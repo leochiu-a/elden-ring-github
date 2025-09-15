@@ -4,14 +4,15 @@
   "description": "Shows an Elden Ring banner when merging pull requests on GitHub",
   "main": "dist/content.js",
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && npm run copy-static",
     "dev": "tsdown --watch",
     "clean": "rm -rf dist",
+    "copy-static": "cp manifest.json dist/ && cp -r src/popup/*.html src/popup/*.css dist/popup/ && mkdir -p dist/content && cp src/content/styles.css dist/content/ && cp -r src/assets dist/",
     "lint": "oxlint src/",
     "lint:fix": "oxlint src/ --fix",
     "format": "prettier --write src/**/*",
     "format:check": "prettier --check src/**/*",
-    "prebuild": "npm run clean",
+    "prebuild": "npm run clean && mkdir -p dist/popup",
     "type-check": "tsc --noEmit",
     "prepare": "npm run build"
   },
@@ -27,6 +28,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/chrome": "^0.0.268",
+    "@types/node": "^22.5.0",
     "oxlint": "^0.9.0",
     "prettier": "^3.3.0",
     "tsdown": "^0.2.13",

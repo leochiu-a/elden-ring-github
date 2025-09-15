@@ -11,6 +11,9 @@ importers:
       '@types/chrome':
         specifier: ^0.0.268
         version: 0.0.268
+      '@types/node':
+        specifier: ^22.5.0
+        version: 22.18.3
       oxlint:
         specifier: ^0.9.0
         version: 0.9.10
@@ -377,6 +380,9 @@ packages:
   '@types/har-format@1.2.16':
     resolution: {integrity: sha512-fluxdy7ryD3MV6h8pTfTYpy/xQzCFC7m89nOH9y94cNqJ1mDIDPut7MnRHI3F6qRmh/cT2fUjG1MLdCNb4hE9A==}
 
+  '@types/node@22.18.3':
+    resolution: {integrity: sha512-gTVM8js2twdtqM+AE2PdGEe9zGQY4UvmFjan9rZcVb6FGdStfjWoWejdmy4CfWVO9rh5MiYQGZloKAGkJt8lMw==}
+
   acorn@8.15.0:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
     engines: {node: '>=0.4.0'}
@@ -531,6 +537,9 @@ packages:
 
   unconfig@0.6.1:
     resolution: {integrity: sha512-cVU+/sPloZqOyJEAfNwnQSFCzFrZm85vcVkryH7lnlB/PiTycUkAjt5Ds79cfIshGOZ+M5v3PBDnKgpmlE5DtA==}
+
+  undici-types@6.21.0:
+    resolution: {integrity: sha512-iwDZqg0QAGrg9Rav5H4n0M64c3mkR59cJ6wQp+7C4nI0gsmExaedaYLNO44eT4AtBBwjbTiGPMlt2Md0T9H9JQ==}
 
   unplugin-isolated-decl@0.6.8:
     resolution: {integrity: sha512-ImD9D8F/FXnzwBW5eCH5lcv0syyifAyJB2JTjJ07Ls9rCsda/rB7KMFnhv7Ew3ssWDKKvkmPhO7LR288+9nqgg==}
@@ -783,6 +792,10 @@ snapshots:
 
   '@types/har-format@1.2.16': {}
 
+  '@types/node@22.18.3':
+    dependencies:
+      undici-types: 6.21.0
+
   acorn@8.15.0: {}
 
   ansis@4.1.0: {}
@@ -985,6 +998,8 @@ snapshots:
       importx: 0.5.2
     transitivePeerDependencies:
       - supports-color
+
+  undici-types@6.21.0: {}
 
   unplugin-isolated-decl@0.6.8(typescript@5.9.2):
     dependencies:

@@ -3,22 +3,11 @@ import { copyFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 
 export default defineConfig({
-  entry: {
-    'content/content': 'src/content/content.ts',
-    'popup/popup': 'src/popup/popup.ts',
-  },
+  entry: ['src/content/content.ts', 'src/popup/popup.ts'],
   outDir: 'dist',
   format: ['cjs'],
-  target: 'es2022',
   clean: true,
-  sourcemap: false,
-  minify: false,
-  dts: false,
-  splitting: false,
   external: ['chrome'],
-  define: {
-    'process.env.NODE_ENV': '"production"'
-  },
   plugins: [
     {
       name: 'copy-files',
@@ -39,8 +28,8 @@ export default defineConfig({
           }
 
           // Copy content CSS
-          mkdirSync('dist/content', { recursive: true });
           if (existsSync('src/content/styles.css')) {
+            mkdirSync('dist/content', { recursive: true });
             copyFileSync('src/content/styles.css', 'dist/content/styles.css');
           }
 
@@ -48,17 +37,14 @@ export default defineConfig({
           if (existsSync('src/assets')) {
             mkdirSync('dist/assets', { recursive: true });
             const files = readdirSync('src/assets');
-            files.forEach(file => {
-              copyFileSync(
-                join('src/assets', file),
-                join('dist/assets', file)
-              );
+            files.forEach((file: string) => {
+              copyFileSync(join('src/assets', file), join('dist/assets', file));
             });
           }
         } catch (error) {
           console.error('Error copying files:', error);
         }
-      }
-    }
-  ]
+      },
+    },
+  ],
 });
