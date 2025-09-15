@@ -1,0 +1,47 @@
+{
+  "name": "elden-ring-github-merger",
+  "version": "1.0.0",
+  "description": "Shows an Elden Ring banner when merging pull requests on GitHub",
+  "main": "dist/content.js",
+  "scripts": {
+    "build": "tsdown",
+    "dev": "tsdown --watch",
+    "clean": "rm -rf dist",
+    "lint": "oxlint src/",
+    "lint:fix": "oxlint src/ --fix",
+    "format": "prettier --write src/**/*",
+    "format:check": "prettier --check src/**/*",
+    "prebuild": "npm run clean",
+    "type-check": "tsc --noEmit",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "chrome-extension",
+    "github",
+    "elden-ring",
+    "pull-request",
+    "merge",
+    "banner"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/chrome": "^0.0.268",
+    "oxlint": "^0.9.0",
+    "prettier": "^3.3.0",
+    "tsdown": "^0.2.13",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/elden-ring-github-merger.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/elden-ring-github-merger/issues"
+  },
+  "homepage": "https://github.com/your-username/elden-ring-github-merger#readme"
+}

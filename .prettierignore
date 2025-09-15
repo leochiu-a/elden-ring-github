@@ -1,0 +1,8 @@
+dist/
+node_modules/
+elden_mail_banner/
+*.min.js
+*.min.css
+package-lock.json
+.git/
+*.mp3

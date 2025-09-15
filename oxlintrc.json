@@ -1,0 +1,31 @@
+{
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "error",
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/prefer-const": "error",
+    "no-console": "off",
+    "prefer-const": "error",
+    "no-var": "error",
+    "eqeqeq": "error",
+    "curly": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "prefer-arrow-callback": "error",
+    "arrow-spacing": "error"
+  },
+  "env": {
+    "browser": true,
+    "webextensions": true,
+    "es2022": true
+  },
+  "globals": {
+    "chrome": "readonly"
+  },
+  "ignorePatterns": [
+    "dist/**",
+    "node_modules/**",
+    "elden_mail_banner/**",
+    "*.min.js"
+  ]
+}

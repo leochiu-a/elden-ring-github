@@ -52,7 +52,12 @@
   position: relative;
   text-align: center;
   color: #d4af37;
-  background: linear-gradient(135deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 45, 45, 0.95) 50%, rgba(26, 26, 26, 0.95) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.95) 0%,
+    rgba(45, 45, 45, 0.95) 50%,
+    rgba(26, 26, 26, 0.95) 100%
+  );
   border: 3px solid #d4af37;
   border-radius: 15px;
   padding: 40px 60px;

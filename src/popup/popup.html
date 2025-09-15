@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Elden Ring GitHub Merger</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup-container">
+      <div class="header">
+        <div class="title">Elden Ring</div>
+        <div class="subtitle">GitHub Merger</div>
+      </div>
+
+      <div class="status" id="status">
+        <div class="status-item">
+          <span class="status-label">Extension:</span>
+          <span class="status-value active">Active</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Page:</span>
+          <span class="status-value" id="pageStatus">Unknown</span>
+        </div>
+      </div>
+
+      <div class="test-section">
+        <div class="section-title">Test Banner</div>
+        <div class="test-buttons">
+          <button class="test-btn primary" id="testMerge">Test Banner</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="section-title">Settings</div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="autoShow" checked />
+            Auto-show on merge
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            <input type="checkbox" id="soundEnabled" checked />
+            Play sound effect
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label">
+            Banner Duration:
+            <select id="duration">
+              <option value="3000">3 seconds</option>
+              <option value="5000" selected>5 seconds</option>
+              <option value="7000">7 seconds</option>
+              <option value="10000">10 seconds</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <div class="section-title">How to Use</div>
+        <div class="info-text">
+          1. Go to any GitHub pull request<br />
+          2. Click "Merge pull request"<br />
+          3. Enjoy the epic banner!
+        </div>
+      </div>
+
+      <div class="footer">
+        <div class="version">v1.0.0</div>
+      </div>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

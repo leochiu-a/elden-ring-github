@@ -9,14 +9,14 @@
     "storage"
   ],
   "action": {
-    "default_popup": "popup.html",
+    "default_popup": "popup/popup.html",
     "default_title": "Elden Ring GitHub Merger"
   },
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["content.js"],
-      "css": ["styles.css"]
+      "js": ["content/content.js"],
+      "css": ["content/styles.css"]
     }
   ],
   "web_accessible_resources": [

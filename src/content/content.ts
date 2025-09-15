@@ -1,27 +1,31 @@
 // Elden Ring GitHub Merger Extension
 class EldenRingMerger {
+  private bannerShown: boolean = false;
+  private soundEnabled: boolean = true;
+  private soundUrl: string;
+
   constructor() {
-    this.bannerShown = false;
-    this.soundEnabled = true;
     this.soundUrl = chrome.runtime.getURL('assets/elden_ring_sound.mp3');
     this.loadSettings();
     this.init();
   }
 
-  loadSettings() {
-    chrome.storage.sync.get(['soundEnabled'], (result) => {
+  private loadSettings(): void {
+    chrome.storage.sync.get(['soundEnabled'], (result: { soundEnabled?: boolean }) => {
       this.soundEnabled = result.soundEnabled !== false; // default true
     });
 
     // Listen for settings changes
-    chrome.storage.onChanged.addListener((changes) => {
-      if (changes.soundEnabled) {
-        this.soundEnabled = changes.soundEnabled.newValue;
-      }
-    });
+    chrome.storage.onChanged.addListener(
+      (changes: { [key: string]: chrome.storage.StorageChange }) => {
+        if (changes.soundEnabled) {
+          this.soundEnabled = changes.soundEnabled.newValue;
+        }
+      },
+    );
   }
 
-  init() {
+  private init(): void {
     // Wait for page to load
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => this.setupMergeDetection());
@@ -30,7 +34,7 @@ class EldenRingMerger {
     }
   }
 
-  setupMergeDetection() {
+  private setupMergeDetection(): void {
     // Detect merge button clicks
     this.detectMergeButtons();
 
@@ -41,10 +45,10 @@ class EldenRingMerger {
     this.detectMergeSuccess();
   }
 
-  detectMergeButtons() {
+  private detectMergeButtons(): void {
     // Listen for merge button clicks
-    document.addEventListener('click', (event) => {
-      const target = event.target;
+    document.addEventListener('click', (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
 
       // Check if it's a merge button
       if (this.isMergeButton(target)) {
@@ -53,7 +57,7 @@ class EldenRingMerger {
     });
   }
 
-  isMergeButton(element) {
+  private isMergeButton(element: HTMLElement): boolean {
     // Various selectors for GitHub merge buttons
     const mergeSelectors = [
       '[data-details-container-group="merge"]',
@@ -61,15 +65,15 @@ class EldenRingMerger {
       '.js-merge-commit-button',
       '.js-merge-box button[type="submit"]',
       'button[data-disable-with*="merge"]',
-      'button[data-disable-with*="Merge"]'
+      'button[data-disable-with*="Merge"]',
     ];
 
-    return mergeSelectors.some(selector => {
-      return element.matches(selector) || element.closest(selector);
+    return mergeSelectors.some((selector) => {
+      return element.matches?.(selector) || element.closest?.(selector);
     });
   }
 
-  detectMergeSuccess() {
+  private detectMergeSuccess(): void {
     // Watch for successful merge indicators
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -86,36 +90,36 @@ class EldenRingMerger {
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
   }
 
-  isSuccessfulMerge(element) {
+  private isSuccessfulMerge(element: Element): boolean {
     // Look for merge success indicators
     const successSelectors = [
       '.merge-status-item.merged',
       '.State--merged',
       '[data-test-selector="pr-timeline-merged-event"]',
-      '.timeline-comment-wrapper .merged'
+      '.timeline-comment-wrapper .merged',
     ];
 
-    const successTexts = [
-      'merged',
-      'Pull request successfully merged',
-      'Merged'
-    ];
+    const successTexts = ['merged', 'Pull request successfully merged', 'Merged'];
 
     // Check selectors
-    if (successSelectors.some(selector => element.matches(selector) || element.querySelector(selector))) {
+    if (
+      successSelectors.some(
+        (selector) => element.matches(selector) || element.querySelector(selector),
+      )
+    ) {
       return true;
     }
 
     // Check text content
     const text = element.textContent?.toLowerCase() || '';
-    return successTexts.some(successText => text.includes(successText.toLowerCase()));
+    return successTexts.some((successText) => text.includes(successText.toLowerCase()));
   }
 
-  observeDOMChanges() {
+  private observeDOMChanges(): void {
     // Observe for GitHub's dynamic content loading
     const observer = new MutationObserver(() => {
       this.detectMergeButtons();
@@ -123,18 +127,18 @@ class EldenRingMerger {
 
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
     });
   }
 
-  onMergeInitiated() {
+  private onMergeInitiated(): void {
     // Show banner after a short delay to allow for merge processing
     setTimeout(() => {
       this.showEldenRingBanner();
     }, 2000);
   }
 
-  showEldenRingBanner() {
+  public showEldenRingBanner(): void {
     if (this.bannerShown) return;
     this.bannerShown = true;
 
@@ -159,7 +163,7 @@ class EldenRingMerger {
     }, 3000);
   }
 
-  showImageBanner() {
+  private showImageBanner(): boolean {
     try {
       const banner = document.createElement('div');
       banner.id = 'elden-ring-banner';
@@ -171,7 +175,7 @@ class EldenRingMerger {
       if (this.soundEnabled) {
         const audio = new Audio(this.soundUrl);
         audio.volume = 0.35;
-        audio.play().catch(err => console.log('Sound playback failed:', err));
+        audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
 
       setTimeout(() => banner.classList.add('show'), 50);
@@ -192,7 +196,7 @@ class EldenRingMerger {
     }
   }
 
-  createTextBanner() {
+  private createTextBanner(): HTMLDivElement {
     const banner = document.createElement('div');
     banner.className = 'elden-ring-merge-banner';
     banner.innerHTML = `
@@ -208,7 +212,7 @@ class EldenRingMerger {
     return banner;
   }
 
-  hideBanner(banner) {
+  private hideBanner(banner: HTMLElement): void {
     if (banner && banner.parentNode) {
       banner.classList.add('fade-out');
       setTimeout(() => {
