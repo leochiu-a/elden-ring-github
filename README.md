@@ -1,15 +1,15 @@
-# Elden Ring GitHub Merger 🏆
+# Elden Ring GitHub 🏆
 
-A Chrome extension that displays an epic Elden Ring-themed banner when you successfully merge pull requests on GitHub. Transform your mundane merges into epic victories!
+A Chrome extension that displays epic Elden Ring-themed banners when you create or merge pull requests on GitHub. Transform your development milestones into legendary moments!
 
 ## ✨ Features
 
-- 🎉 **Epic Merge Banner** - Shows a stunning "MERGE ACCOMPLISHED" banner with Elden Ring aesthetics
-- 🔊 **Sound Effects** - Plays the iconic Elden Ring achievement sound (toggleable)
-- ⚙️ **Customizable Settings** - Adjust banner duration and sound preferences
-- 🎯 **Smart Detection** - Only triggers on actual PR merges, not other GitHub actions
-- 🧪 **Test Mode** - Preview the banner anytime from the extension popup
-- 🎨 **Responsive Design** - Works beautifully on all screen sizes
+- 🆕 **PR Creation Banner** - Celebrate new pull request creation with a dedicated banner
+- 🎉 **PR Merge Banner** - Shows an epic "MERGE ACCOMPLISHED" banner when PRs are merged
+- 🔊 **Sound Effects** - Plays the iconic Elden Ring achievement sound
+- ⚙️ **Independent Controls** - Separate settings to enable/disable creation and merge banners
+
+![Elden Ring GitHub](./public/elden-ring-pr-merged.webp)
 
 ## 🚀 Quick Start
 
@@ -28,17 +28,26 @@ A Chrome extension that displays an epic Elden Ring-themed banner when you succe
    - Click "Load unpacked"
    - Select the `dist/` folder
 
-3. **Start merging**:
-   - Navigate to any GitHub pull request
-   - Merge away and enjoy the epic celebration! 🎉
+3. **Start creating and merging**:
+   - Navigate to any GitHub repository
+   - Create or merge pull requests and enjoy epic celebrations! 🎉
 
 ## 🎮 Usage
 
 ### Automatic Mode
 
+**For PR Creation:**
+
+1. Navigate to any GitHub repository
+2. Go to the "Compare" page (e.g., from comparing branches)
+3. Click "Create pull request" button
+4. Watch your PR creation celebrated with an epic banner! ✨
+
+**For PR Merging:**
+
 1. Visit any GitHub pull request page
 2. Click "Merge pull request" → "Confirm merge"
-3. Watch as your merge is celebrated with epic fanfare!
+3. Watch as your merge is celebrated with epic fanfare! 🎉
 
 ### Test Mode
 
@@ -50,9 +59,12 @@ A Chrome extension that displays an epic Elden Ring-themed banner when you succe
 
 Access settings by clicking the extension icon:
 
-- **🔊 Sound Effects**: Toggle the Elden Ring achievement sound
-- **⏱️ Banner Duration**: Choose how long the celebration lasts (3-10 seconds)
-- **📊 Page Status**: See if you're on a GitHub page
+- **🎉 Show on PR merged**: Toggle banner display when PRs are merged
+- **🆕 Show on PR creation**: Toggle banner display when PRs are created
+- **🔊 Play sound effect**: Toggle the iconic Elden Ring achievement sound
+- **⏱️ Banner Duration**: Choose how long celebrations last (3-10 seconds)
+- **📊 Page Status**: See if you're currently on a GitHub page
+- **🧪 Test Banner**: Preview the banner effect anytime
 
 ## 🛠️ Development
 
@@ -67,7 +79,7 @@ Access settings by clicking the extension icon:
 ```
 src/
 ├── content/              # Content script (GitHub integration)
-│   ├── content.ts       # Main merge detection logic
+│   ├── content.ts       # PR creation & merge detection logic
 │   └── styles.css       # Banner styling
 ├── popup/               # Extension popup interface
 │   ├── popup.ts        # Settings and test functionality
@@ -78,7 +90,9 @@ src/
 │   └── global.d.ts     # Global type declarations
 └── assets/             # Static resources
     ├── elden_ring_sound.mp3
-    └── pull-request-merged.png
+    ├── pull-request-created.png    # PR creation banner
+    ├── pull-request-merged.png     # PR merge banner
+    └── icon*.png        # Extension icons
 
 dist/                   # Built extension (Chrome loads this)
 ├── manifest.json
