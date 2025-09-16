@@ -14,7 +14,7 @@
     "format:check": "prettier --check src/**/*",
     "prebuild": "npm run clean && mkdir -p dist/popup",
     "type-check": "tsc --noEmit",
-    "prepare": "npm run build",
+    "prepare": "husky",
     "changeset": "changeset",
     "version": "changeset version",
     "release": "npm run build && changeset publish"
@@ -33,6 +33,8 @@
     "@changesets/cli": "^2.29.7",
     "@types/chrome": "^0.0.268",
     "@types/node": "^22.5.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.6",
     "oxlint": "^0.9.0",
     "prettier": "^3.3.0",
     "tsdown": "^0.2.13",
@@ -49,5 +51,14 @@
   "bugs": {
     "url": "https://github.com/your-username/elden-ring-github-merger/issues"
   },
-  "homepage": "https://github.com/your-username/elden-ring-github-merger#readme"
+  "homepage": "https://github.com/your-username/elden-ring-github-merger#readme",
+  "lint-staged": {
+    "*.{ts,js}": [
+      "oxlint --fix",
+      "prettier --write"
+    ],
+    "*.{html,css,json,md}": [
+      "prettier --write"
+    ]
+  }
 }
