@@ -115,7 +115,7 @@ class EldenRingMerger {
         // If the PR was created within the last 30 seconds and the setting is enabled, show banner
         if (timeDiff < 30000 && this.showOnPRCreate) {
           console.log('✅ PR creation detected via storage flag, showing banner');
-          this.showEldenRingBanner();
+          this.showEldenRingBanner('created');
 
           // Clear the flag so we don't show banner again
           chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
@@ -199,20 +199,22 @@ class EldenRingMerger {
     }, 10000);
   }
 
-  public showEldenRingBanner(): void {
+  public showEldenRingBanner(type: 'merged' | 'created' = 'merged'): void {
     if (this.bannerShown) return;
     this.bannerShown = true;
 
     // Only show image banner
-    this.showImageBanner();
+    this.showImageBanner(type);
   }
 
-  private showImageBanner(): boolean {
+  private showImageBanner(type: 'merged' | 'created' = 'merged'): boolean {
     try {
       const banner = document.createElement('div');
       banner.id = 'elden-ring-banner';
-      const imgPath = chrome.runtime.getURL('assets/pull-request-merged.png');
-      banner.innerHTML = `<img src="${imgPath}" alt="Pull Request Merged">`;
+      const imageName = type === 'created' ? 'pull-request-created.png' : 'pull-request-merged.png';
+      const altText = type === 'created' ? 'Pull Request Created' : 'Pull Request Merged';
+      const imgPath = chrome.runtime.getURL(`assets/${imageName}`);
+      banner.innerHTML = `<img src="${imgPath}" alt="${altText}">`;
       document.body.appendChild(banner);
 
       // Play sound effect
