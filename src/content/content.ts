@@ -95,7 +95,10 @@ class EldenRingMerger {
           if (node.nodeType === Node.ELEMENT_NODE) {
             const element = node as Element;
             // Check for merge success indicator
-            if (element.querySelector('.State.State--merged') || element.matches('.State.State--merged')) {
+            if (
+              element.querySelector('.State.State--merged') ||
+              element.matches('.State.State--merged')
+            ) {
               console.log('✅ Merge completed successfully!');
               this.showEldenRingBanner();
               observer.disconnect(); // Stop observing once we find the merged state
