@@ -1,7 +1,7 @@
 {
-  "name": "elden-ring-github-merger",
+  "name": "elden-ring-github",
   "version": "1.0.0",
-  "description": "Shows an Elden Ring banner when merging pull requests on GitHub",
+  "description": "Shows an Elden Ring banner when creating or merging pull requests on GitHub",
   "main": "dist/content.js",
   "scripts": {
     "build": "tsdown && npm run copy-static",
@@ -46,12 +46,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your-username/elden-ring-github-merger.git"
+    "url": "git+https://github.com/leochiu-a/elden-ring-github.git"
   },
   "bugs": {
-    "url": "https://github.com/your-username/elden-ring-github-merger/issues"
+    "url": "https://github.com/leochiu-a/elden-ring-github/issues"
   },
-  "homepage": "https://github.com/your-username/elden-ring-github-merger#readme",
+  "homepage": "https://github.com/leochiu-a/elden-ring-github#readme",
   "lint-staged": {
     "*.{ts,js}": [
       "oxlint --fix",
