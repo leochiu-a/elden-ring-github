@@ -1,3 +1,5 @@
+import type { EldenRingSettings } from '../types/settings';
+
 document.addEventListener('DOMContentLoaded', (): void => {
   const testMergeBtn = document.getElementById('testMerge') as HTMLButtonElement;
   const autoShowCheckbox = document.getElementById('autoShow') as HTMLInputElement;
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       if (currentTab) {
         // Inject the banner directly into the current tab
         chrome.scripting.executeScript({
-          target: { tabId: currentTab.id },
+          target: { tabId: currentTab.id! },
           func: createAndShowBanner,
         });
       }
@@ -70,7 +72,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       const currentTab = tabs[0];
       if (currentTab) {
         chrome.scripting.executeScript({
-          target: { tabId: currentTab.id },
+          target: { tabId: currentTab.id! },
           func: updateExtensionSettings,
           args: [settings],
         });
@@ -80,7 +82,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
 });
 
 // Functions to be injected into the content script
-function createAndShowBanner() {
+function createAndShowBanner(): boolean {
   // Remove existing banner if any
   const existingBanner = document.querySelector('#elden-ring-banner, .elden-ring-merge-banner');
   if (existingBanner) {
@@ -165,10 +167,12 @@ function createAndShowBanner() {
         }
       }, duration);
     });
+
+    return true;
   }
 }
 
-function updateExtensionSettings(settings) {
+function updateExtensionSettings(settings: EldenRingSettings): void {
   // Update the extension's settings in the content script
   if (window.eldenRingMergerSettings) {
     window.eldenRingMergerSettings = { ...window.eldenRingMergerSettings, ...settings };
