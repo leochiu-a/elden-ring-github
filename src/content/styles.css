@@ -1,0 +1,202 @@
+/* Elden Ring GitHub Merge Banner - Inspired by elden_mail_banner */
+#elden-ring-banner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  z-index: 999999;
+  transition: all 0.5s ease-out;
+  pointer-events: none;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#elden-ring-banner.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+#elden-ring-banner img {
+  width: 100vw;
+  max-width: 100vw;
+  height: auto;
+  filter: drop-shadow(0 0 10px black);
+  display: block;
+}
+
+/* Fallback text banner for when no image is available */
+.elden-ring-merge-banner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  z-index: 999999;
+  transition: all 0.5s ease-out;
+  pointer-events: none;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.elden-ring-merge-banner.show {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.elden-ring-banner-content {
+  position: relative;
+  text-align: center;
+  color: #d4af37;
+  background: linear-gradient(
+    135deg,
+    rgba(26, 26, 26, 0.95) 0%,
+    rgba(45, 45, 45, 0.95) 50%,
+    rgba(26, 26, 26, 0.95) 100%
+  );
+  border: 3px solid #d4af37;
+  border-radius: 15px;
+  padding: 40px 60px;
+  box-shadow:
+    0 0 50px rgba(212, 175, 55, 0.4),
+    inset 0 0 30px rgba(212, 175, 55, 0.1);
+  max-width: 800px;
+  min-width: 500px;
+  backdrop-filter: blur(10px);
+}
+
+.elden-ring-banner-content::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: linear-gradient(45deg, #d4af37, #b8860b, #d4af37);
+  border-radius: 15px;
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.elden-ring-text h1 {
+  font-size: 3.5em;
+  font-weight: bold;
+  text-shadow:
+    0 0 10px #d4af37,
+    0 0 20px #d4af37,
+    0 0 30px #d4af37;
+  margin: 0 0 20px 0;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+.elden-ring-text p {
+  font-size: 1.8em;
+  margin: 0;
+  opacity: 0.9;
+  letter-spacing: 1px;
+  font-style: italic;
+}
+
+.elden-ring-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  font-size: 2em;
+  cursor: pointer;
+  color: #d4af37;
+  transition: all 0.3s ease;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(212, 175, 55, 0.1);
+  border: 2px solid #d4af37;
+}
+
+.elden-ring-close:hover {
+  background: rgba(212, 175, 55, 0.2);
+  transform: scale(1.1);
+  text-shadow: 0 0 10px #d4af37;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glow {
+  from {
+    text-shadow:
+      0 0 10px #d4af37,
+      0 0 20px #d4af37,
+      0 0 30px #d4af37;
+  }
+  to {
+    text-shadow:
+      0 0 20px #d4af37,
+      0 0 30px #d4af37,
+      0 0 40px #d4af37;
+  }
+}
+
+.elden-ring-merge-banner.fade-out {
+  animation: fadeOut 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .elden-ring-banner-content {
+    padding: 40px 50px;
+    min-width: 300px;
+    max-width: 90%;
+  }
+
+  .elden-ring-text h1 {
+    font-size: 2.5em;
+  }
+
+  .elden-ring-text p {
+    font-size: 1.4em;
+  }
+}
+
+@media (max-width: 480px) {
+  .elden-ring-banner-content {
+    padding: 30px 40px;
+  }
+
+  .elden-ring-text h1 {
+    font-size: 2em;
+    letter-spacing: 2px;
+  }
+
+  .elden-ring-text p {
+    font-size: 1.2em;
+  }
+}
