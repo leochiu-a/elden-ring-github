@@ -125,7 +125,7 @@ function createAndShowBanner(): boolean {
 
     return true;
   } catch (error) {
-    console.log('Image banner failed, creating fallback text banner');
+    console.error('Image banner failed, creating fallback text banner', error);
 
     // Create fallback text banner
     const banner = document.createElement('div');
