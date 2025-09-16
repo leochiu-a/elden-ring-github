@@ -1,6 +1,6 @@
 {
   "name": "elden-ring-github",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Shows an Elden Ring banner when creating or merging pull requests on GitHub",
   "main": "dist/content.js",
   "scripts": {
