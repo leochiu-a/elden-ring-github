@@ -14,7 +14,10 @@
     "format:check": "prettier --check src/**/*",
     "prebuild": "npm run clean && mkdir -p dist/popup",
     "type-check": "tsc --noEmit",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "keywords": [
     "chrome-extension",
@@ -27,6 +30,7 @@
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
+    "@changesets/cli": "^2.29.7",
     "@types/chrome": "^0.0.268",
     "@types/node": "^22.5.0",
     "oxlint": "^0.9.0",
