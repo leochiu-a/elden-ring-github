@@ -2,8 +2,9 @@ import type { EldenRingSettings } from '../types/settings';
 
 document.addEventListener('DOMContentLoaded', (): void => {
   const testMergeBtn = document.getElementById('testMerge') as HTMLButtonElement;
-  const autoShowCheckbox = document.getElementById('autoShow') as HTMLInputElement;
+  const showOnPRMergedCheckbox = document.getElementById('showOnPRMerged') as HTMLInputElement;
   const soundEnabledCheckbox = document.getElementById('soundEnabled') as HTMLInputElement;
+  const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
   const durationSelect = document.getElementById('duration') as HTMLSelectElement;
   const pageStatusElement = document.getElementById('pageStatus') as HTMLSpanElement;
 
@@ -15,8 +16,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
   // Event listeners
   testMergeBtn?.addEventListener('click', showTestBanner);
-  autoShowCheckbox?.addEventListener('change', saveSettings);
+  showOnPRMergedCheckbox?.addEventListener('change', saveSettings);
   soundEnabledCheckbox?.addEventListener('change', saveSettings);
+  showOnPRCreateCheckbox?.addEventListener('change', saveSettings);
   durationSelect?.addEventListener('change', saveSettings);
 
   function checkCurrentPage(): void {
@@ -49,17 +51,22 @@ document.addEventListener('DOMContentLoaded', (): void => {
   }
 
   function loadSettings() {
-    chrome.storage.sync.get(['autoShow', 'soundEnabled', 'duration'], function (result) {
-      autoShowCheckbox.checked = result.autoShow !== false; // default true
-      soundEnabledCheckbox.checked = result.soundEnabled !== false; // default true
-      durationSelect.value = result.duration || '5000'; // default 5 seconds
-    });
+    chrome.storage.sync.get(
+      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'duration'],
+      function (result) {
+        showOnPRMergedCheckbox.checked = result.showOnPRMerged !== false; // default true
+        soundEnabledCheckbox.checked = result.soundEnabled !== false; // default true
+        showOnPRCreateCheckbox.checked = result.showOnPRCreate !== false; // default true
+        durationSelect.value = result.duration || '5000'; // default 5 seconds
+      },
+    );
   }
 
   function saveSettings() {
     const settings = {
-      autoShow: autoShowCheckbox.checked,
+      showOnPRMerged: showOnPRMergedCheckbox.checked,
       soundEnabled: soundEnabledCheckbox.checked,
+      showOnPRCreate: showOnPRCreateCheckbox.checked,
       duration: parseInt(durationSelect.value),
     };
 
