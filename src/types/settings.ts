@@ -1,5 +1,5 @@
 export interface EldenRingSettings {
-  autoShow?: boolean;
+  showOnPRMerged?: boolean;
   soundEnabled?: boolean;
   duration?: number;
   showOnPRCreate?: boolean;

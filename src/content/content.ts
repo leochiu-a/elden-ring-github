@@ -1,6 +1,7 @@
 class EldenRingMerger {
   private bannerShown: boolean = false;
   private soundEnabled: boolean = true;
+  private showOnPRMerged: boolean = true;
   private showOnPRCreate: boolean = true;
   private soundUrl: string;
 
@@ -12,9 +13,10 @@ class EldenRingMerger {
 
   private loadSettings(): void {
     chrome.storage.sync.get(
-      ['soundEnabled', 'showOnPRCreate'],
-      (result: { soundEnabled?: boolean; showOnPRCreate?: boolean }) => {
+      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate'],
+      (result: { soundEnabled?: boolean; showOnPRMerged?: boolean; showOnPRCreate?: boolean }) => {
         this.soundEnabled = result.soundEnabled !== false; // default true
+        this.showOnPRMerged = result.showOnPRMerged !== false; // default true
         this.showOnPRCreate = result.showOnPRCreate !== false; // default true
       },
     );
@@ -24,6 +26,9 @@ class EldenRingMerger {
       (changes: { [key: string]: chrome.storage.StorageChange }) => {
         if (changes.soundEnabled) {
           this.soundEnabled = changes.soundEnabled.newValue;
+        }
+        if (changes.showOnPRMerged) {
+          this.showOnPRMerged = changes.showOnPRMerged.newValue;
         }
         if (changes.showOnPRCreate) {
           this.showOnPRCreate = changes.showOnPRCreate.newValue;
@@ -169,7 +174,11 @@ class EldenRingMerger {
               element.matches('.State.State--merged')
             ) {
               console.log('✅ Merge completed successfully!');
-              this.showEldenRingBanner();
+              if (this.showOnPRMerged) {
+                this.showEldenRingBanner();
+              } else {
+                console.log('🚫 PR merge banner disabled in settings');
+              }
               observer.disconnect(); // Stop observing once we find the merged state
             }
           }
@@ -187,7 +196,11 @@ class EldenRingMerger {
       const mergedElement = document.querySelector('.State.State--merged');
       if (mergedElement) {
         console.log('✅ Merge state already present!');
-        this.showEldenRingBanner();
+        if (this.showOnPRMerged) {
+          this.showEldenRingBanner();
+        } else {
+          console.log('🚫 PR merge banner disabled in settings');
+        }
         observer.disconnect();
       }
     }, 100);
