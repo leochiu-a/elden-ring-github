@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Elden Ring GitHub Merger",
+  "name": "Elden Ring GitHub",
   "version": "1.0.0",
   "description": "Epic Elden Ring celebration banner for GitHub pull request merges. Transform your coding victories into legendary moments!",
   "author": "Leo Chiu",
@@ -8,7 +8,7 @@
   "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Elden Ring GitHub Merger",
+    "default_title": "Elden Ring GitHub",
     "default_icon": {
       "16": "assets/icon16.png",
       "32": "assets/icon32.png",
