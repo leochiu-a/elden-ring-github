@@ -2,15 +2,25 @@
   "manifest_version": 3,
   "name": "Elden Ring GitHub Merger",
   "version": "1.0.0",
-  "description": "Shows an Elden Ring banner when merging on GitHub",
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "storage"
-  ],
+  "description": "Epic Elden Ring celebration banner for GitHub pull request merges. Transform your coding victories into legendary moments!",
+  "author": "Leo Chiu",
+  "homepage_url": "https://github.com/leochiu-a/elden-ring-github",
+  "permissions": ["activeTab", "scripting", "storage"],
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "Elden Ring GitHub Merger"
+    "default_title": "Elden Ring GitHub Merger",
+    "default_icon": {
+      "16": "assets/icon16.png",
+      "32": "assets/icon32.png",
+      "48": "assets/icon48.png",
+      "128": "assets/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
   },
   "content_scripts": [
     {
