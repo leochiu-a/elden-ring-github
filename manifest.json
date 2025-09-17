@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Elden Ring GitHub",
   "version": "1.0.0",
-  "description": "When a pull request is forged or a merge fulfilled, a grand banner rises in the style of Elden Ring — transmuting mere milestones of development into moments of legend.",
+  "description": "Summon Elden Ring banners when pull requests are forged or merged — turning every milestone into legend.",
   "author": "Leo Chiu",
   "homepage_url": "https://github.com/leochiu-a/elden-ring-github",
   "permissions": ["activeTab", "scripting", "storage"],
