@@ -1,7 +1,7 @@
 {
   "name": "elden-ring-github",
   "version": "1.1.0",
-  "description": "Shows an Elden Ring banner when creating or merging pull requests on GitHub",
+  "description": "When a pull request is forged or a merge fulfilled, a grand banner rises in the style of Elden Ring — transmuting mere milestones of development into moments of legend.",
   "main": "dist/content.js",
   "scripts": {
     "build": "tsdown && npm run copy-static",
@@ -60,5 +60,6 @@
     "*.{html,css,json,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "packageManager": "pnpm@10.14.0+sha512.ad27a79641b49c3e481a16a805baa71817a04bbe06a38d17e60e2eaee83f6a146c6a688125f5792e48dd5ba30e7da52a5cda4c3992b9ccf333f9ce223af84748"
 }
