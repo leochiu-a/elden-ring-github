@@ -1,15 +1,16 @@
 # Elden Ring GitHub 🏆
 
-A Chrome extension that displays epic Elden Ring-themed banners when you create or merge pull requests on GitHub. Transform your development milestones into legendary moments!
+A Chrome extension that displays epic Elden Ring-themed banners when you create, approve, or merge pull requests on GitHub. Transform your development milestones into legendary moments!
 
 👉 [Elden Ring GitHub (Chrome Web Store)](https://chromewebstore.google.com/detail/elden-ring-github/dfhmjflkbjjmlapbghecjfhnnmehcbke?authuser=1&hl=en)
 
 ## ✨ Features
 
 - 🆕 **PR Creation Banner** - Celebrate new pull request creation with a dedicated banner
+- ✅ **PR Approval Banner** - Epic celebration when you approve pull requests
 - 🎉 **PR Merge Banner** - Shows an epic "MERGE ACCOMPLISHED" banner when PRs are merged
 - 🔊 **Sound Effects** - Plays the iconic Elden Ring achievement sound
-- ⚙️ **Independent Controls** - Separate settings to enable/disable creation and merge banners
+- ⚙️ **Independent Controls** - Separate settings to enable/disable creation, approval, and merge banners
 
 ![Elden Ring GitHub](./public/elden-ring-pr-merged.webp)
 
@@ -45,6 +46,12 @@ A Chrome extension that displays epic Elden Ring-themed banners when you create 
 3. Click "Create pull request" button
 4. Watch your PR creation celebrated with an epic banner! ✨
 
+**For PR Approval:**
+
+1. Visit any GitHub pull request page or files view
+2. Click "Review changes" → Select "Approve" → "Submit review"
+3. Navigate back to the main PR page to see your approval celebrated! ✅
+
 **For PR Merging:**
 
 1. Visit any GitHub pull request page
@@ -63,6 +70,7 @@ Access settings by clicking the extension icon:
 
 - **🎉 Show on PR merged**: Toggle banner display when PRs are merged
 - **🆕 Show on PR creation**: Toggle banner display when PRs are created
+- **✅ Show on PR approve**: Toggle banner display when PRs are approved
 - **🔊 Play sound effect**: Toggle the iconic Elden Ring achievement sound
 - **⏱️ Banner Duration**: Choose how long celebrations last (3-10 seconds)
 - **📊 Page Status**: See if you're currently on a GitHub page
@@ -94,6 +102,7 @@ src/
     ├── elden_ring_sound.mp3
     ├── pull-request-created.png    # PR creation banner
     ├── pull-request-merged.png     # PR merge banner
+    ├── approve-pull-request.webp   # PR approval banner
     └── icon*.png        # Extension icons
 
 dist/                   # Built extension (Chrome loads this)

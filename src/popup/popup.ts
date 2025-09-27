@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   const showOnPRMergedCheckbox = document.getElementById('showOnPRMerged') as HTMLInputElement;
   const soundEnabledCheckbox = document.getElementById('soundEnabled') as HTMLInputElement;
   const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
+  const showOnPRApproveCheckbox = document.getElementById('showOnPRApprove') as HTMLInputElement;
   const durationSelect = document.getElementById('duration') as HTMLSelectElement;
   const pageStatusElement = document.getElementById('pageStatus') as HTMLSpanElement;
 
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   showOnPRMergedCheckbox?.addEventListener('change', saveSettings);
   soundEnabledCheckbox?.addEventListener('change', saveSettings);
   showOnPRCreateCheckbox?.addEventListener('change', saveSettings);
+  showOnPRApproveCheckbox?.addEventListener('change', saveSettings);
   durationSelect?.addEventListener('change', saveSettings);
 
   function checkCurrentPage(): void {
@@ -52,11 +54,12 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
   function loadSettings() {
     chrome.storage.sync.get(
-      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'duration'],
+      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'showOnPRApprove', 'duration'],
       function (result) {
         showOnPRMergedCheckbox.checked = result.showOnPRMerged !== false; // default true
         soundEnabledCheckbox.checked = result.soundEnabled !== false; // default true
         showOnPRCreateCheckbox.checked = result.showOnPRCreate !== false; // default true
+        showOnPRApproveCheckbox.checked = result.showOnPRApprove !== false; // default true
         durationSelect.value = result.duration || '5000'; // default 5 seconds
       },
     );
@@ -67,6 +70,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       showOnPRMerged: showOnPRMergedCheckbox.checked,
       soundEnabled: soundEnabledCheckbox.checked,
       showOnPRCreate: showOnPRCreateCheckbox.checked,
+      showOnPRApprove: showOnPRApproveCheckbox.checked,
       duration: parseInt(durationSelect.value),
     };
 
@@ -100,8 +104,8 @@ function createAndShowBanner(): boolean {
   try {
     const banner = document.createElement('div');
     banner.id = 'elden-ring-banner';
-    const imgPath = chrome.runtime.getURL('assets/pull-request-merged.png');
-    banner.innerHTML = `<img src="${imgPath}" alt="Pull Request Merged">`;
+    const imgPath = chrome.runtime.getURL('assets/approve-pull-request.png');
+    banner.innerHTML = `<img src="${imgPath}" alt="Pull Request Approved">`;
     document.body.appendChild(banner);
 
     // Play sound effect if enabled
