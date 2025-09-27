@@ -3,4 +3,5 @@ export interface EldenRingSettings {
   soundEnabled?: boolean;
   duration?: number;
   showOnPRCreate?: boolean;
+  showOnPRApprove?: boolean;
 }

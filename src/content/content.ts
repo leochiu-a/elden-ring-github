@@ -3,6 +3,7 @@ class EldenRingMerger {
   private soundEnabled: boolean = true;
   private showOnPRMerged: boolean = true;
   private showOnPRCreate: boolean = true;
+  private showOnPRApprove: boolean = true;
   private soundUrl: string;
 
   constructor() {
@@ -13,11 +14,17 @@ class EldenRingMerger {
 
   private loadSettings(): void {
     chrome.storage.sync.get(
-      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate'],
-      (result: { soundEnabled?: boolean; showOnPRMerged?: boolean; showOnPRCreate?: boolean }) => {
+      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove'],
+      (result: {
+        soundEnabled?: boolean;
+        showOnPRMerged?: boolean;
+        showOnPRCreate?: boolean;
+        showOnPRApprove?: boolean;
+      }) => {
         this.soundEnabled = result.soundEnabled !== false; // default true
         this.showOnPRMerged = result.showOnPRMerged !== false; // default true
         this.showOnPRCreate = result.showOnPRCreate !== false; // default true
+        this.showOnPRApprove = result.showOnPRApprove !== false; // default true
       },
     );
 
@@ -32,6 +39,9 @@ class EldenRingMerger {
         }
         if (changes.showOnPRCreate) {
           this.showOnPRCreate = changes.showOnPRCreate.newValue;
+        }
+        if (changes.showOnPRApprove) {
+          this.showOnPRApprove = changes.showOnPRApprove.newValue;
         }
       },
     );
@@ -50,11 +60,17 @@ class EldenRingMerger {
     // Check if we just created a PR and should show banner
     this.checkForPRCreationSuccess();
 
+    // Check if we just approved a PR and should show banner
+    this.checkForPRApprovalSuccess();
+
     // Detect merge button clicks
     this.detectMergeButtons();
 
     // Detect PR creation button clicks
     this.detectPRCreationButtons();
+
+    // Detect PR approval button clicks
+    this.detectPRApprovalButtons();
 
     // Observe DOM changes for dynamically loaded content
     this.observeDOMChanges();
@@ -99,6 +115,7 @@ class EldenRingMerger {
     const observer = new MutationObserver(() => {
       this.detectMergeButtons();
       this.detectPRCreationButtons();
+      this.detectPRApprovalButtons();
     });
 
     observer.observe(document.body, {
@@ -133,6 +150,32 @@ class EldenRingMerger {
     });
   }
 
+  private checkForPRApprovalSuccess(): void {
+    // Check if we're on a PR page and if approval was recently triggered
+    const currentUrl = window.location.href;
+    const isPRPage = /\/pull\/\d+/.test(currentUrl);
+
+    if (!isPRPage) return;
+
+    chrome.storage.local.get(['prApprovalTriggered', 'prApprovalTime'], (result) => {
+      if (result.prApprovalTriggered && result.prApprovalTime) {
+        const timeDiff = Date.now() - result.prApprovalTime;
+        // If the PR was approved within the last 30 seconds and the setting is enabled, show banner
+        if (timeDiff < 30000 && this.showOnPRApprove) {
+          console.log('✅ PR approval detected via storage flag, showing banner');
+          this.showEldenRingBanner('approved');
+
+          // Clear the flag so we don't show banner again
+          chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+        } else if (timeDiff < 30000 && !this.showOnPRApprove) {
+          console.log('🚫 PR approval detected but disabled in settings');
+          // Still clear the flag even if disabled
+          chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+        }
+      }
+    });
+  }
+
   private detectPRCreationButtons(): void {
     // Check if we're on a compare page
     const currentUrl = window.location.href;
@@ -159,6 +202,60 @@ class EldenRingMerger {
       });
       createButton.setAttribute('data-elden-ring-listener', 'true');
     }
+  }
+
+  private detectPRApprovalButtons(): void {
+    // Check if we're on a PR page (including files view)
+    const currentUrl = window.location.href;
+    const isPRPage = /\/pull\/\d+/.test(currentUrl);
+    if (!isPRPage) {
+      return;
+    }
+
+    // Look for "Submit review" buttons within dialog
+    const dialogElement = document.querySelector('div[role="dialog"]');
+    if (dialogElement) {
+      const buttons = Array.from(dialogElement.querySelectorAll('button'));
+      const submitButton = buttons.find((button) =>
+        button.textContent?.toLowerCase().includes('submit review'),
+      );
+
+      if (submitButton && !submitButton.hasAttribute('data-elden-ring-approval-listener')) {
+        submitButton.addEventListener('click', () => {
+          // Check if approve radio button is selected within the same dialog at click time
+          const approveRadio = dialogElement.querySelector(
+            'input[name="reviewEvent"][value="approve"]',
+          ) as HTMLInputElement;
+
+          if (approveRadio && approveRadio.checked) {
+            if (this.showOnPRApprove) {
+              console.log('🎯 Submit review with approval selected');
+              // Store approval flag for when we navigate back to PR page
+              chrome.storage.local.set({
+                prApprovalTriggered: true,
+                prApprovalTime: Date.now(),
+              });
+            } else {
+              console.log('🚫 PR approval banner disabled in settings');
+            }
+          }
+        });
+        submitButton.setAttribute('data-elden-ring-approval-listener', 'true');
+      }
+    }
+
+    // Also look for the approve radio button directly
+    const approveRadios = document.querySelectorAll('input[name="reviewEvent"][value="approve"]');
+    approveRadios.forEach((radio) => {
+      if (!radio.hasAttribute('data-elden-ring-approval-listener')) {
+        radio.addEventListener('change', () => {
+          if ((radio as HTMLInputElement).checked) {
+            console.log('🎯 Approve option selected');
+          }
+        });
+        radio.setAttribute('data-elden-ring-approval-listener', 'true');
+      }
+    });
   }
 
   private waitForMergeComplete(): void {
@@ -212,7 +309,7 @@ class EldenRingMerger {
     }, 10000);
   }
 
-  public showEldenRingBanner(type: 'merged' | 'created' = 'merged'): void {
+  public showEldenRingBanner(type: 'merged' | 'created' | 'approved' = 'merged'): void {
     if (this.bannerShown) return;
     this.bannerShown = true;
 
@@ -220,12 +317,24 @@ class EldenRingMerger {
     this.showImageBanner(type);
   }
 
-  private showImageBanner(type: 'merged' | 'created' = 'merged'): boolean {
+  private showImageBanner(type: 'merged' | 'created' | 'approved' = 'merged'): boolean {
     try {
       const banner = document.createElement('div');
       banner.id = 'elden-ring-banner';
-      const imageName = type === 'created' ? 'pull-request-created.png' : 'pull-request-merged.png';
-      const altText = type === 'created' ? 'Pull Request Created' : 'Pull Request Merged';
+      let imageName: string;
+      let altText: string;
+
+      if (type === 'created') {
+        imageName = 'pull-request-created.png';
+        altText = 'Pull Request Created';
+      } else if (type === 'approved') {
+        imageName = 'approve-pull-request.png';
+        altText = 'Pull Request Approved';
+      } else {
+        imageName = 'pull-request-merged.png';
+        altText = 'Pull Request Merged';
+      }
+
       const imgPath = chrome.runtime.getURL(`assets/${imageName}`);
       banner.innerHTML = `<img src="${imgPath}" alt="${altText}">`;
       document.body.appendChild(banner);
