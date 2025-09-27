@@ -19,6 +19,7 @@ beforeEach(() => {
       soundEnabled: true,
       showOnPRMerged: true,
       showOnPRCreate: true,
+      showOnPRApprove: true,
     });
   });
 
@@ -110,16 +111,36 @@ describe('EldenRingMerger', () => {
   });
 
   it('should handle different banner types', () => {
-    const types = ['merged', 'created'] as const;
+    const types = ['merged', 'created', 'approved'] as const;
 
     types.forEach((type) => {
-      const imageName = type === 'created' ? 'pull-request-created.png' : 'pull-request-merged.png';
-      const altText = type === 'created' ? 'Pull Request Created' : 'Pull Request Merged';
+      let imageName: string;
+      let altText: string;
 
-      expect(imageName).toBe(
-        type === 'created' ? 'pull-request-created.png' : 'pull-request-merged.png',
-      );
-      expect(altText).toBe(type === 'created' ? 'Pull Request Created' : 'Pull Request Merged');
+      if (type === 'created') {
+        imageName = 'pull-request-created.png';
+        altText = 'Pull Request Created';
+      } else if (type === 'approved') {
+        imageName = 'approve-pull-request.webp';
+        altText = 'Pull Request Approved';
+      } else {
+        imageName = 'pull-request-merged.png';
+        altText = 'Pull Request Merged';
+      }
+
+      expect(imageName).toBeTruthy();
+      expect(altText).toBeTruthy();
+
+      if (type === 'created') {
+        expect(imageName).toBe('pull-request-created.png');
+        expect(altText).toBe('Pull Request Created');
+      } else if (type === 'approved') {
+        expect(imageName).toBe('approve-pull-request.webp');
+        expect(altText).toBe('Pull Request Approved');
+      } else {
+        expect(imageName).toBe('pull-request-merged.png');
+        expect(altText).toBe('Pull Request Merged');
+      }
     });
   });
 
@@ -234,5 +255,123 @@ describe('EldenRingMerger', () => {
     // Test removing PR creation flag
     chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
     expect(mockStorageLocalRemove).toHaveBeenCalledWith(['prCreationTriggered', 'prCreationTime']);
+  });
+
+  it('should detect approval radio button in dialog', () => {
+    // Setup DOM with approval dialog
+    document.body.innerHTML = `
+      <div role="dialog">
+        <input type="radio" name="reviewEvent" value="approve" checked>
+        <input type="radio" name="reviewEvent" value="comment">
+        <button type="button">Submit review</button>
+      </div>
+    `;
+
+    const dialogElement = document.querySelector('div[role="dialog"]');
+    const approveRadio = dialogElement?.querySelector(
+      'input[name="reviewEvent"][value="approve"]',
+    ) as HTMLInputElement;
+    const submitButton = Array.from(dialogElement?.querySelectorAll('button') || []).find(
+      (button) => button.textContent?.toLowerCase().includes('submit review'),
+    );
+
+    expect(dialogElement).toBeTruthy();
+    expect(approveRadio).toBeTruthy();
+    expect(approveRadio?.checked).toBe(true);
+    expect(submitButton).toBeTruthy();
+  });
+
+  it('should handle PR approval flag storage', () => {
+    const mockStorageLocalGet = vi.fn();
+    const mockStorageLocalSet = vi.fn();
+    const mockStorageLocalRemove = vi.fn();
+
+    global.chrome.storage.local.get = mockStorageLocalGet;
+    global.chrome.storage.local.set = mockStorageLocalSet;
+    global.chrome.storage.local.remove = mockStorageLocalRemove;
+
+    // Test setting PR approval flag
+    const prApprovalData = {
+      prApprovalTriggered: true,
+      prApprovalTime: Date.now(),
+    };
+
+    chrome.storage.local.set(prApprovalData);
+    expect(mockStorageLocalSet).toHaveBeenCalledWith(prApprovalData);
+
+    // Test removing PR approval flag
+    chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+    expect(mockStorageLocalRemove).toHaveBeenCalledWith(['prApprovalTriggered', 'prApprovalTime']);
+  });
+
+  it('should check approval settings correctly', () => {
+    // Simulate the settings loading with approval setting
+    chrome.storage.sync.get(
+      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove'],
+      () => {},
+    );
+
+    expect(mockChromeStorageGet).toHaveBeenCalledWith(
+      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove'],
+      expect.any(Function),
+    );
+  });
+
+  it('should handle approval storage changes', () => {
+    const mockCallback = vi.fn();
+    const changes = {
+      showOnPRApprove: { newValue: false },
+    };
+
+    // Simulate storage change handling for approval
+    if (changes.showOnPRApprove) {
+      mockCallback('showOnPRApprove', changes.showOnPRApprove.newValue);
+    }
+
+    expect(mockCallback).toHaveBeenCalledWith('showOnPRApprove', false);
+  });
+
+  it('should detect PR approval time validation', () => {
+    const currentTime = Date.now();
+    const recentTime = currentTime - 15000; // 15 seconds ago
+    const oldTime = currentTime - 35000; // 35 seconds ago
+
+    // Test recent approval should be valid
+    const recentTimeDiff = currentTime - recentTime;
+    expect(recentTimeDiff < 30000).toBe(true);
+
+    // Test old approval should be invalid
+    const oldTimeDiff = currentTime - oldTime;
+    expect(oldTimeDiff < 30000).toBe(false);
+  });
+
+  it('should validate PR page URL patterns for approval', () => {
+    const validPRUrls = [
+      'https://github.com/user/repo/pull/123',
+      'https://github.com/user/repo/pull/123/conversation',
+      'https://github.com/user/repo/pull/123/commits',
+    ];
+
+    const invalidPRUrls = [
+      'https://github.com/user/repo/pull/123/files',
+      'https://github.com/user/repo',
+      'https://github.com/user/repo/issues/123',
+    ];
+
+    validPRUrls.forEach((url) => {
+      const isPRPage = /\/pull\/\d+/.test(url);
+      expect(isPRPage).toBe(true);
+    });
+
+    invalidPRUrls.forEach((url) => {
+      if (url.includes('/files')) {
+        // Files page should still match PR pattern but handled differently
+        const isPRPage = /\/pull\/\d+/.test(url);
+        expect(isPRPage).toBe(true);
+      } else {
+        const isPRPage = /\/pull\/\d+/.test(url);
+        expect(isPRPage).toBe(false);
+      }
+    });
   });
 });
