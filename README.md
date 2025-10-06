@@ -2,7 +2,7 @@
 
 A Chrome extension that displays epic Elden Ring-themed banners when you create, approve, or merge pull requests on GitHub. Transform your development milestones into legendary moments!
 
-👉 [Elden Ring GitHub (Chrome Web Store)](https://chromewebstore.google.com/detail/elden-ring-github/dfhmjflkbjjmlapbghecjfhnnmehcbke?authuser=1&hl=en)
+👉 [Elden Ring GitHub (Chrome Extension Store)](https://chromewebstore.google.com/detail/elden-ring-github/dfhmjflkbjjmlapbghecjfhnnmehcbke?authuser=1&hl=en)
 
 ## ✨ Features
 
