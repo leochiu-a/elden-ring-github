@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         chrome.scripting.executeScript({
           target: { tabId: currentTab.id! },
           func: updateExtensionSettings,
-          args: [settings],
+          args: [settings as EldenRingSettings],
         });
       }
     });
