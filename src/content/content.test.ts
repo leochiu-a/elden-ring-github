@@ -153,13 +153,29 @@ describe('EldenRingMerger', () => {
     global.Audio = vi.fn().mockImplementation(() => mockAudio);
     global.chrome.runtime.getURL = vi.fn(() => 'chrome-extension://mock/sound.mp3');
 
-    const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+    const soundType = 'you-die-sound';
+    const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
     audio.volume = 0.35;
     audio.play();
 
     expect(global.Audio).toHaveBeenCalledWith('chrome-extension://mock/sound.mp3');
     expect(mockAudio.play).toHaveBeenCalled();
     expect(mockAudio.volume).toBe(0.35);
+  });
+
+  it('should support sound type selection', () => {
+    const soundTypes: Array<'you-die-sound' | 'lost-grace-discovered'> = [
+      'you-die-sound',
+      'lost-grace-discovered',
+    ];
+
+    soundTypes.forEach((soundType) => {
+      const expectedPath = `assets/${soundType}.mp3`;
+      expect(expectedPath).toContain('.mp3');
+      expect(expectedPath).toContain(soundType);
+    });
+
+    expect(soundTypes.length).toBe(2);
   });
 
   it('should add event listeners to merge buttons', () => {

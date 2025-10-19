@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   const soundEnabledCheckbox = document.getElementById('soundEnabled') as HTMLInputElement;
   const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
   const showOnPRApproveCheckbox = document.getElementById('showOnPRApprove') as HTMLInputElement;
+  const soundTypeSelect = document.getElementById('soundType') as HTMLSelectElement;
   const durationSelect = document.getElementById('duration') as HTMLSelectElement;
   const pageStatusElement = document.getElementById('pageStatus') as HTMLSpanElement;
 
@@ -21,6 +22,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   soundEnabledCheckbox?.addEventListener('change', saveSettings);
   showOnPRCreateCheckbox?.addEventListener('change', saveSettings);
   showOnPRApproveCheckbox?.addEventListener('change', saveSettings);
+  soundTypeSelect?.addEventListener('change', saveSettings);
   durationSelect?.addEventListener('change', saveSettings);
 
   function checkCurrentPage(): void {
@@ -54,12 +56,20 @@ document.addEventListener('DOMContentLoaded', (): void => {
 
   function loadSettings() {
     chrome.storage.sync.get(
-      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'showOnPRApprove', 'duration'],
+      [
+        'showOnPRMerged',
+        'soundEnabled',
+        'showOnPRCreate',
+        'showOnPRApprove',
+        'soundType',
+        'duration',
+      ],
       function (result) {
         showOnPRMergedCheckbox.checked = result.showOnPRMerged !== false; // default true
         soundEnabledCheckbox.checked = result.soundEnabled !== false; // default true
         showOnPRCreateCheckbox.checked = result.showOnPRCreate !== false; // default true
         showOnPRApproveCheckbox.checked = result.showOnPRApprove !== false; // default true
+        soundTypeSelect.value = result.soundType || 'you-die-sound'; // default you-die-sound
         durationSelect.value = result.duration || '5000'; // default 5 seconds
       },
     );
@@ -71,6 +81,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       soundEnabled: soundEnabledCheckbox.checked,
       showOnPRCreate: showOnPRCreateCheckbox.checked,
       showOnPRApprove: showOnPRApproveCheckbox.checked,
+      soundType: soundTypeSelect.value,
       duration: parseInt(durationSelect.value),
     };
 
@@ -85,7 +96,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         chrome.scripting.executeScript({
           target: { tabId: currentTab.id! },
           func: updateExtensionSettings,
-          args: [settings],
+          args: [settings as EldenRingSettings],
         });
       }
     });
@@ -109,9 +120,10 @@ function createAndShowBanner(): boolean {
     document.body.appendChild(banner);
 
     // Play sound effect if enabled
-    chrome.storage.sync.get(['soundEnabled'], function (soundResult) {
+    chrome.storage.sync.get(['soundEnabled', 'soundType'], function (soundResult) {
       if (soundResult.soundEnabled !== false) {
-        const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+        const soundType = soundResult.soundType || 'you-die-sound';
+        const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
         audio.volume = 0.35;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
@@ -154,9 +166,10 @@ function createAndShowBanner(): boolean {
     document.body.appendChild(banner);
 
     // Play sound effect if enabled
-    chrome.storage.sync.get(['soundEnabled'], function (soundResult) {
+    chrome.storage.sync.get(['soundEnabled', 'soundType'], function (soundResult) {
       if (soundResult.soundEnabled !== false) {
-        const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+        const soundType = soundResult.soundType || 'you-die-sound';
+        const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
         audio.volume = 0.35;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }

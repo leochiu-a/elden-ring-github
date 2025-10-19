@@ -4,27 +4,39 @@ class EldenRingMerger {
   private showOnPRMerged: boolean = true;
   private showOnPRCreate: boolean = true;
   private showOnPRApprove: boolean = true;
+  private soundType: 'you-die-sound' | 'lost-grace-discovered' = 'you-die-sound';
   private soundUrl: string;
 
   constructor() {
-    this.soundUrl = chrome.runtime.getURL('assets/elden_ring_sound.mp3');
+    this.soundUrl = this.getSoundUrl();
     this.loadSettings();
     this.init();
   }
 
+  private getSoundUrl(): string {
+    return chrome.runtime.getURL(`assets/${this.soundType}.mp3`);
+  }
+
+  private updateSoundUrl(): void {
+    this.soundUrl = this.getSoundUrl();
+  }
+
   private loadSettings(): void {
     chrome.storage.sync.get(
-      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove'],
+      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove', 'soundType'],
       (result: {
         soundEnabled?: boolean;
         showOnPRMerged?: boolean;
         showOnPRCreate?: boolean;
         showOnPRApprove?: boolean;
+        soundType?: 'you-die-sound' | 'lost-grace-discovered';
       }) => {
         this.soundEnabled = result.soundEnabled !== false; // default true
         this.showOnPRMerged = result.showOnPRMerged !== false; // default true
         this.showOnPRCreate = result.showOnPRCreate !== false; // default true
         this.showOnPRApprove = result.showOnPRApprove !== false; // default true
+        this.soundType = result.soundType || 'you-die-sound'; // default you-die-sound
+        this.updateSoundUrl();
       },
     );
 
@@ -42,6 +54,10 @@ class EldenRingMerger {
         }
         if (changes.showOnPRApprove) {
           this.showOnPRApprove = changes.showOnPRApprove.newValue;
+        }
+        if (changes.soundType) {
+          this.soundType = changes.soundType.newValue;
+          this.updateSoundUrl();
         }
       },
     );
