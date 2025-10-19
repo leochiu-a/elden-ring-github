@@ -4,4 +4,5 @@ export interface EldenRingSettings {
   duration?: number;
   showOnPRCreate?: boolean;
   showOnPRApprove?: boolean;
+  soundType?: 'you-die-sound' | 'lost-grace-discovered';
 }
