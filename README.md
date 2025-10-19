@@ -99,7 +99,7 @@ src/
 │   ├── settings.ts     # Settings interface
 │   └── global.d.ts     # Global type declarations
 └── assets/             # Static resources
-    ├── elden_ring_sound.mp3
+    ├── you-die-sound.mp3
     ├── pull-request-created.png    # PR creation banner
     ├── pull-request-merged.png     # PR merge banner
     ├── approve-pull-request.webp   # PR approval banner

@@ -7,7 +7,7 @@ class EldenRingMerger {
   private soundUrl: string;
 
   constructor() {
-    this.soundUrl = chrome.runtime.getURL('assets/elden_ring_sound.mp3');
+    this.soundUrl = chrome.runtime.getURL('assets/you-die-sound.mp3');
     this.loadSettings();
     this.init();
   }

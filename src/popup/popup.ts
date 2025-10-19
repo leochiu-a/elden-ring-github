@@ -111,7 +111,7 @@ function createAndShowBanner(): boolean {
     // Play sound effect if enabled
     chrome.storage.sync.get(['soundEnabled'], function (soundResult) {
       if (soundResult.soundEnabled !== false) {
-        const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+        const audio = new Audio(chrome.runtime.getURL('assets/you-die-sound.mp3'));
         audio.volume = 0.35;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
@@ -156,7 +156,7 @@ function createAndShowBanner(): boolean {
     // Play sound effect if enabled
     chrome.storage.sync.get(['soundEnabled'], function (soundResult) {
       if (soundResult.soundEnabled !== false) {
-        const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+        const audio = new Audio(chrome.runtime.getURL('assets/you-die-sound.mp3'));
         audio.volume = 0.35;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }

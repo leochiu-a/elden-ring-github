@@ -153,7 +153,7 @@ describe('EldenRingMerger', () => {
     global.Audio = vi.fn().mockImplementation(() => mockAudio);
     global.chrome.runtime.getURL = vi.fn(() => 'chrome-extension://mock/sound.mp3');
 
-    const audio = new Audio(chrome.runtime.getURL('assets/elden_ring_sound.mp3'));
+    const audio = new Audio(chrome.runtime.getURL('assets/you-die-sound.mp3'));
     audio.volume = 0.35;
     audio.play();
 
