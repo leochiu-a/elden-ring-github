@@ -358,7 +358,7 @@ class EldenRingMerger {
       // Play sound effect
       if (this.soundEnabled) {
         const audio = new Audio(this.soundUrl);
-        audio.volume = 0.35;
+        audio.volume = 1.0;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
 

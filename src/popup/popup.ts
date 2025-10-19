@@ -124,7 +124,7 @@ function createAndShowBanner(): boolean {
       if (soundResult.soundEnabled !== false) {
         const soundType = soundResult.soundType || 'you-die-sound';
         const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = 0.35;
+        audio.volume = 1.0;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
     });
@@ -170,7 +170,7 @@ function createAndShowBanner(): boolean {
       if (soundResult.soundEnabled !== false) {
         const soundType = soundResult.soundType || 'you-die-sound';
         const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = 0.35;
+        audio.volume = 1.0;
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
     });
