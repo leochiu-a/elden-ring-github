@@ -1,5 +1,5 @@
 ---
-'elden-ring-github': patch
+'elden-ring-github': minor
 ---
 
 feat: add lost grace discovered support
