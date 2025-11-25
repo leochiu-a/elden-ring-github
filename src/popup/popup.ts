@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   const soundEnabledCheckbox = document.getElementById('soundEnabled') as HTMLInputElement;
   const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
   const showOnPRApproveCheckbox = document.getElementById('showOnPRApprove') as HTMLInputElement;
+  const showOnPRCloseCheckbox = document.getElementById('showOnPRClose') as HTMLInputElement;
   const soundTypeSelect = document.getElementById('soundType') as HTMLSelectElement;
   const durationSelect = document.getElementById('duration') as HTMLSelectElement;
   const pageStatusElement = document.getElementById('pageStatus') as HTMLSpanElement;
@@ -22,6 +23,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   soundEnabledCheckbox?.addEventListener('change', saveSettings);
   showOnPRCreateCheckbox?.addEventListener('change', saveSettings);
   showOnPRApproveCheckbox?.addEventListener('change', saveSettings);
+  showOnPRCloseCheckbox?.addEventListener('change', saveSettings);
   soundTypeSelect?.addEventListener('change', saveSettings);
   durationSelect?.addEventListener('change', saveSettings);
 
@@ -63,12 +65,14 @@ document.addEventListener('DOMContentLoaded', (): void => {
         'showOnPRApprove',
         'soundType',
         'duration',
+        'showOnPRClose',
       ],
       function (result) {
         showOnPRMergedCheckbox.checked = result.showOnPRMerged !== false; // default true
         soundEnabledCheckbox.checked = result.soundEnabled !== false; // default true
         showOnPRCreateCheckbox.checked = result.showOnPRCreate !== false; // default true
         showOnPRApproveCheckbox.checked = result.showOnPRApprove !== false; // default true
+        showOnPRCloseCheckbox.checked = result.showOnPRClose !== false; // default true
         soundTypeSelect.value = result.soundType || 'you-die-sound'; // default you-die-sound
         durationSelect.value = result.duration || '5000'; // default 5 seconds
       },
@@ -81,6 +85,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       soundEnabled: soundEnabledCheckbox.checked,
       showOnPRCreate: showOnPRCreateCheckbox.checked,
       showOnPRApprove: showOnPRApproveCheckbox.checked,
+      showOnPRClose: showOnPRCloseCheckbox.checked,
       soundType: soundTypeSelect.value,
       duration: parseInt(durationSelect.value),
     };

@@ -1,9 +1,13 @@
+import { renderBanner, type BannerType } from './banner';
+import { waitForCloseComplete } from './closeWatcher';
+
 class EldenRingMerger {
   private bannerShown: boolean = false;
   private soundEnabled: boolean = true;
   private showOnPRMerged: boolean = true;
   private showOnPRCreate: boolean = true;
   private showOnPRApprove: boolean = true;
+  private showOnPRClose: boolean = true;
   private soundType: 'you-die-sound' | 'lost-grace-discovered' = 'you-die-sound';
   private soundUrl: string;
 
@@ -23,18 +27,27 @@ class EldenRingMerger {
 
   private loadSettings(): void {
     chrome.storage.sync.get(
-      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove', 'soundType'],
+      [
+        'soundEnabled',
+        'showOnPRMerged',
+        'showOnPRCreate',
+        'showOnPRApprove',
+        'showOnPRClose',
+        'soundType',
+      ],
       (result: {
         soundEnabled?: boolean;
         showOnPRMerged?: boolean;
         showOnPRCreate?: boolean;
         showOnPRApprove?: boolean;
+        showOnPRClose?: boolean;
         soundType?: 'you-die-sound' | 'lost-grace-discovered';
       }) => {
         this.soundEnabled = result.soundEnabled !== false; // default true
         this.showOnPRMerged = result.showOnPRMerged !== false; // default true
         this.showOnPRCreate = result.showOnPRCreate !== false; // default true
         this.showOnPRApprove = result.showOnPRApprove !== false; // default true
+        this.showOnPRClose = result.showOnPRClose !== false; // default true
         this.soundType = result.soundType || 'you-die-sound'; // default you-die-sound
         this.updateSoundUrl();
       },
@@ -54,6 +67,9 @@ class EldenRingMerger {
         }
         if (changes.showOnPRApprove) {
           this.showOnPRApprove = changes.showOnPRApprove.newValue;
+        }
+        if (changes.showOnPRClose) {
+          this.showOnPRClose = changes.showOnPRClose.newValue;
         }
         if (changes.soundType) {
           this.soundType = changes.soundType.newValue;
@@ -81,6 +97,9 @@ class EldenRingMerger {
 
     // Detect merge button clicks
     this.detectMergeButtons();
+
+    // Detect close button clicks
+    this.detectCloseButtons();
 
     // Detect PR creation button clicks
     this.detectPRCreationButtons();
@@ -126,10 +145,39 @@ class EldenRingMerger {
     }
   }
 
+  private detectCloseButtons(): void {
+    const currentUrl = window.location.href;
+    const isPRPage = /\/pull\/\d+/.test(currentUrl);
+    if (!isPRPage || !this.showOnPRClose) {
+      return;
+    }
+
+    const closeButtonContainer = document.querySelector('#partial-new-comment-form-actions');
+    if (!closeButtonContainer) {
+      return;
+    }
+
+    const closeButtons = closeButtonContainer.querySelectorAll('button');
+    closeButtons.forEach((button) => {
+      const buttonText = button.textContent?.toLowerCase().trim() || '';
+      if (
+        buttonText.includes('close pull request') &&
+        !button.hasAttribute('data-elden-ring-close-listener')
+      ) {
+        button.addEventListener('click', () => {
+          console.log('🛑 Close pull request button clicked');
+          waitForCloseComplete(() => this.handleCloseCelebration());
+        });
+        button.setAttribute('data-elden-ring-close-listener', 'true');
+      }
+    });
+  }
+
   private observeDOMChanges(): void {
     // Observe for GitHub's dynamic content loading
     const observer = new MutationObserver(() => {
       this.detectMergeButtons();
+      this.detectCloseButtons();
       this.detectPRCreationButtons();
       this.detectPRApprovalButtons();
     });
@@ -325,59 +373,33 @@ class EldenRingMerger {
     }, 10000);
   }
 
-  public showEldenRingBanner(type: 'merged' | 'created' | 'approved' = 'merged'): void {
+  public showEldenRingBanner(type: BannerType = 'merged'): void {
     if (this.bannerShown) return;
     this.bannerShown = true;
 
-    // Only show image banner
-    this.showImageBanner(type);
+    const defaultSoundUrl =
+      type === 'closed' ? chrome.runtime.getURL('assets/you-die-sound.mp3') : this.soundUrl;
+
+    const success = renderBanner({
+      type,
+      soundUrl: defaultSoundUrl,
+      soundEnabled: this.soundEnabled,
+      onHide: () => {
+        this.bannerShown = false;
+      },
+    });
+
+    if (!success) {
+      this.bannerShown = false;
+    }
   }
 
-  private showImageBanner(type: 'merged' | 'created' | 'approved' = 'merged'): boolean {
-    try {
-      const banner = document.createElement('div');
-      banner.id = 'elden-ring-banner';
-      let imageName: string;
-      let altText: string;
-
-      if (type === 'created') {
-        imageName = 'pull-request-created.png';
-        altText = 'Pull Request Created';
-      } else if (type === 'approved') {
-        imageName = 'approve-pull-request.png';
-        altText = 'Pull Request Approved';
-      } else {
-        imageName = 'pull-request-merged.png';
-        altText = 'Pull Request Merged';
-      }
-
-      const imgPath = chrome.runtime.getURL(`assets/${imageName}`);
-      banner.innerHTML = `<img src="${imgPath}" alt="${altText}">`;
-      document.body.appendChild(banner);
-
-      // Play sound effect
-      if (this.soundEnabled) {
-        const audio = new Audio(this.soundUrl);
-        audio.volume = 1.0;
-        audio.play().catch((err) => console.log('Sound playback failed:', err));
-      }
-
-      setTimeout(() => banner.classList.add('show'), 50);
-      setTimeout(() => {
-        banner.classList.remove('show');
-        setTimeout(() => {
-          if (banner.parentNode) {
-            banner.remove();
-          }
-          this.bannerShown = false;
-        }, 500);
-      }, 3000);
-
-      return true;
-    } catch (error) {
-      console.log('Image banner failed, using text banner:', error);
-      return false;
+  private handleCloseCelebration(): void {
+    if (!this.showOnPRClose) {
+      console.log('🚫 PR close banner disabled in settings');
+      return;
     }
+    this.showEldenRingBanner('closed');
   }
 }
 

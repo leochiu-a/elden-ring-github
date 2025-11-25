@@ -111,7 +111,7 @@ describe('EldenRingMerger', () => {
   });
 
   it('should handle different banner types', () => {
-    const types = ['merged', 'created', 'approved'] as const;
+    const types = ['merged', 'created', 'approved', 'closed'] as const;
 
     types.forEach((type) => {
       let imageName: string;
@@ -121,8 +121,11 @@ describe('EldenRingMerger', () => {
         imageName = 'pull-request-created.png';
         altText = 'Pull Request Created';
       } else if (type === 'approved') {
-        imageName = 'approve-pull-request.webp';
+        imageName = 'approve-pull-request.png';
         altText = 'Pull Request Approved';
+      } else if (type === 'closed') {
+        imageName = 'close-pull-request.png';
+        altText = 'Pull Request Closed';
       } else {
         imageName = 'pull-request-merged.png';
         altText = 'Pull Request Merged';
@@ -135,8 +138,11 @@ describe('EldenRingMerger', () => {
         expect(imageName).toBe('pull-request-created.png');
         expect(altText).toBe('Pull Request Created');
       } else if (type === 'approved') {
-        expect(imageName).toBe('approve-pull-request.webp');
+        expect(imageName).toBe('approve-pull-request.png');
         expect(altText).toBe('Pull Request Approved');
+      } else if (type === 'closed') {
+        expect(imageName).toBe('close-pull-request.png');
+        expect(altText).toBe('Pull Request Closed');
       } else {
         expect(imageName).toBe('pull-request-merged.png');
         expect(altText).toBe('Pull Request Merged');
@@ -225,12 +231,43 @@ describe('EldenRingMerger', () => {
     expect(mergedElement?.textContent).toBe('Merged');
   });
 
+  it('should detect close pull request buttons by text', () => {
+    document.body.innerHTML = `
+      <div id="partial-new-comment-form-actions">
+        <button>Close pull request</button>
+        <button>Something else</button>
+      </div>
+    `;
+
+    const container = document.querySelector('#partial-new-comment-form-actions');
+    const closeButtons = Array.from(container?.querySelectorAll('button') || []).filter((button) =>
+      button.textContent?.toLowerCase().includes('close pull request'),
+    );
+
+    expect(closeButtons.length).toBe(1);
+    expect(closeButtons[0]?.textContent?.trim()).toBe('Close pull request');
+  });
+
+  it('should detect closed state element with closed class', () => {
+    document.body.innerHTML = `
+      <span reviewable_state="ready" title="Status: Closed" data-view-component="true" class="State State--closed">
+        <svg></svg>
+        Closed
+      </span>
+    `;
+
+    const closedElement = document.querySelector('.State.State--closed');
+    expect(closedElement).toBeTruthy();
+    expect(closedElement?.textContent?.toLowerCase()).toContain('closed');
+  });
+
   it('should handle storage changes', () => {
     const mockCallback = vi.fn();
     const changes = {
       soundEnabled: { newValue: false },
       showOnPRMerged: { newValue: false },
       showOnPRCreate: { newValue: true },
+      showOnPRClose: { newValue: false },
     };
 
     // Simulate storage change handling
@@ -243,11 +280,15 @@ describe('EldenRingMerger', () => {
     if (changes.showOnPRCreate) {
       mockCallback('showOnPRCreate', changes.showOnPRCreate.newValue);
     }
+    if (changes.showOnPRClose) {
+      mockCallback('showOnPRClose', changes.showOnPRClose.newValue);
+    }
 
-    expect(mockCallback).toHaveBeenCalledTimes(3);
+    expect(mockCallback).toHaveBeenCalledTimes(4);
     expect(mockCallback).toHaveBeenCalledWith('soundEnabled', false);
     expect(mockCallback).toHaveBeenCalledWith('showOnPRMerged', false);
     expect(mockCallback).toHaveBeenCalledWith('showOnPRCreate', true);
+    expect(mockCallback).toHaveBeenCalledWith('showOnPRClose', false);
   });
 
   it('should handle PR creation flag storage', () => {

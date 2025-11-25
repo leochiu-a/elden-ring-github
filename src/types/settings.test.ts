@@ -7,6 +7,7 @@ describe('EldenRingSettings type', () => {
       soundEnabled: true,
       showOnPRMerged: true,
       showOnPRCreate: false,
+      showOnPRClose: true,
       duration: 5000,
     };
 
@@ -14,6 +15,7 @@ describe('EldenRingSettings type', () => {
       soundEnabled: true,
       showOnPRMerged: true,
       showOnPRCreate: false,
+      showOnPRClose: true,
       duration: 5000,
     });
   });
@@ -28,6 +30,7 @@ describe('EldenRingSettings type', () => {
     expect(partialSettings.duration).toBe(3000);
     expect(partialSettings.showOnPRMerged).toBeUndefined();
     expect(partialSettings.showOnPRCreate).toBeUndefined();
+    expect(partialSettings.showOnPRClose).toBeUndefined();
   });
 
   it('should validate boolean properties', () => {
@@ -35,12 +38,14 @@ describe('EldenRingSettings type', () => {
       soundEnabled: true,
       showOnPRMerged: false,
       showOnPRCreate: true,
+      showOnPRClose: false,
       duration: 10000,
     };
 
     expect(typeof settings.soundEnabled).toBe('boolean');
     expect(typeof settings.showOnPRMerged).toBe('boolean');
     expect(typeof settings.showOnPRCreate).toBe('boolean');
+    expect(typeof settings.showOnPRClose).toBe('boolean');
     expect(typeof settings.duration).toBe('number');
   });
 

@@ -6,6 +6,7 @@ const setupMockDOM = () => {
     <input type="checkbox" id="showOnPRMerged">
     <input type="checkbox" id="soundEnabled">
     <input type="checkbox" id="showOnPRCreate">
+    <input type="checkbox" id="showOnPRClose">
     <select id="duration">
       <option value="3000">3 seconds</option>
       <option value="5000">5 seconds</option>
@@ -45,6 +46,7 @@ describe('Popup functionality', () => {
         showOnPRMerged: true,
         soundEnabled: true,
         showOnPRCreate: true,
+        showOnPRClose: false,
         duration: 5000,
       });
     });
@@ -53,7 +55,7 @@ describe('Popup functionality', () => {
 
     // Simulate loadSettings function
     chrome.storage.sync.get(
-      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'duration'],
+      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'showOnPRClose', 'duration'],
       (result) => {
         const showOnPRMergedCheckbox = document.getElementById(
           'showOnPRMerged',
@@ -62,22 +64,25 @@ describe('Popup functionality', () => {
         const showOnPRCreateCheckbox = document.getElementById(
           'showOnPRCreate',
         ) as HTMLInputElement;
+        const showOnPRCloseCheckbox = document.getElementById('showOnPRClose') as HTMLInputElement;
         const durationSelect = document.getElementById('duration') as HTMLSelectElement;
 
         showOnPRMergedCheckbox.checked = result.showOnPRMerged !== false;
         soundEnabledCheckbox.checked = result.soundEnabled !== false;
         showOnPRCreateCheckbox.checked = result.showOnPRCreate !== false;
+        showOnPRCloseCheckbox.checked = result.showOnPRClose !== false;
         durationSelect.value = result.duration?.toString() || '5000';
 
         expect(showOnPRMergedCheckbox.checked).toBe(true);
         expect(soundEnabledCheckbox.checked).toBe(true);
         expect(showOnPRCreateCheckbox.checked).toBe(true);
+        expect(showOnPRCloseCheckbox.checked).toBe(false);
         expect(durationSelect.value).toBe('5000');
       },
     );
 
     expect(mockGet).toHaveBeenCalledWith(
-      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'duration'],
+      ['showOnPRMerged', 'soundEnabled', 'showOnPRCreate', 'showOnPRClose', 'duration'],
       expect.any(Function),
     );
   });
@@ -89,12 +94,14 @@ describe('Popup functionality', () => {
     const showOnPRMergedCheckbox = document.getElementById('showOnPRMerged') as HTMLInputElement;
     const soundEnabledCheckbox = document.getElementById('soundEnabled') as HTMLInputElement;
     const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
+    const showOnPRCloseCheckbox = document.getElementById('showOnPRClose') as HTMLInputElement;
     const durationSelect = document.getElementById('duration') as HTMLSelectElement;
 
     // Set test values
     showOnPRMergedCheckbox.checked = false;
     soundEnabledCheckbox.checked = true;
     showOnPRCreateCheckbox.checked = false;
+    showOnPRCloseCheckbox.checked = true;
     durationSelect.value = '10000';
 
     // Simulate saveSettings function
@@ -102,6 +109,7 @@ describe('Popup functionality', () => {
       showOnPRMerged: showOnPRMergedCheckbox.checked,
       soundEnabled: soundEnabledCheckbox.checked,
       showOnPRCreate: showOnPRCreateCheckbox.checked,
+      showOnPRClose: showOnPRCloseCheckbox.checked,
       duration: parseInt(durationSelect.value),
     };
 
@@ -111,6 +119,7 @@ describe('Popup functionality', () => {
       showOnPRMerged: false,
       soundEnabled: true,
       showOnPRCreate: false,
+      showOnPRClose: true,
       duration: 10000,
     });
   });
