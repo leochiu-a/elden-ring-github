@@ -7,6 +7,7 @@ class EldenRingMerger {
   private showOnPRMerged: boolean = true;
   private showOnPRCreate: boolean = true;
   private showOnPRApprove: boolean = true;
+  private showOnPRClose: boolean = true;
   private soundType: 'you-die-sound' | 'lost-grace-discovered' = 'you-die-sound';
   private soundUrl: string;
 
@@ -26,18 +27,27 @@ class EldenRingMerger {
 
   private loadSettings(): void {
     chrome.storage.sync.get(
-      ['soundEnabled', 'showOnPRMerged', 'showOnPRCreate', 'showOnPRApprove', 'soundType'],
+      [
+        'soundEnabled',
+        'showOnPRMerged',
+        'showOnPRCreate',
+        'showOnPRApprove',
+        'showOnPRClose',
+        'soundType',
+      ],
       (result: {
         soundEnabled?: boolean;
         showOnPRMerged?: boolean;
         showOnPRCreate?: boolean;
         showOnPRApprove?: boolean;
+        showOnPRClose?: boolean;
         soundType?: 'you-die-sound' | 'lost-grace-discovered';
       }) => {
         this.soundEnabled = result.soundEnabled !== false; // default true
         this.showOnPRMerged = result.showOnPRMerged !== false; // default true
         this.showOnPRCreate = result.showOnPRCreate !== false; // default true
         this.showOnPRApprove = result.showOnPRApprove !== false; // default true
+        this.showOnPRClose = result.showOnPRClose !== false; // default true
         this.soundType = result.soundType || 'you-die-sound'; // default you-die-sound
         this.updateSoundUrl();
       },
@@ -57,6 +67,9 @@ class EldenRingMerger {
         }
         if (changes.showOnPRApprove) {
           this.showOnPRApprove = changes.showOnPRApprove.newValue;
+        }
+        if (changes.showOnPRClose) {
+          this.showOnPRClose = changes.showOnPRClose.newValue;
         }
         if (changes.soundType) {
           this.soundType = changes.soundType.newValue;
@@ -135,7 +148,7 @@ class EldenRingMerger {
   private detectCloseButtons(): void {
     const currentUrl = window.location.href;
     const isPRPage = /\/pull\/\d+/.test(currentUrl);
-    if (!isPRPage) {
+    if (!isPRPage || !this.showOnPRClose) {
       return;
     }
 
@@ -382,6 +395,10 @@ class EldenRingMerger {
   }
 
   private handleCloseCelebration(): void {
+    if (!this.showOnPRClose) {
+      console.log('🚫 PR close banner disabled in settings');
+      return;
+    }
     this.showEldenRingBanner('closed');
   }
 }

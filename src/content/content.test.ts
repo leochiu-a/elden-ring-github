@@ -267,6 +267,7 @@ describe('EldenRingMerger', () => {
       soundEnabled: { newValue: false },
       showOnPRMerged: { newValue: false },
       showOnPRCreate: { newValue: true },
+      showOnPRClose: { newValue: false },
     };
 
     // Simulate storage change handling
@@ -279,11 +280,15 @@ describe('EldenRingMerger', () => {
     if (changes.showOnPRCreate) {
       mockCallback('showOnPRCreate', changes.showOnPRCreate.newValue);
     }
+    if (changes.showOnPRClose) {
+      mockCallback('showOnPRClose', changes.showOnPRClose.newValue);
+    }
 
-    expect(mockCallback).toHaveBeenCalledTimes(3);
+    expect(mockCallback).toHaveBeenCalledTimes(4);
     expect(mockCallback).toHaveBeenCalledWith('soundEnabled', false);
     expect(mockCallback).toHaveBeenCalledWith('showOnPRMerged', false);
     expect(mockCallback).toHaveBeenCalledWith('showOnPRCreate', true);
+    expect(mockCallback).toHaveBeenCalledWith('showOnPRClose', false);
   });
 
   it('should handle PR creation flag storage', () => {
