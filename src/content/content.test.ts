@@ -37,7 +37,7 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-describe('EldenRingMerger', () => {
+describe('EldenRingOrchestrator', () => {
   it('should call storage API for loading settings', () => {
     // Simulate the loadSettings method behavior
     chrome.storage.sync.get(['soundEnabled', 'showOnPRMerged', 'showOnPRCreate'], () => {});
