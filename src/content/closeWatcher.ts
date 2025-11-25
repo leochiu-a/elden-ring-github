@@ -1,4 +1,7 @@
 let closeHandled = false;
+// Track timeouts so we can cancel them once a close is confirmed
+let checkTimeout: ReturnType<typeof setTimeout> | null = null;
+let cleanupTimeout: ReturnType<typeof setTimeout> | null = null;
 
 const isClosedState = (element: Element | null): boolean => {
   if (!element) return false;
@@ -13,6 +16,14 @@ const handleClose = (observer: MutationObserver, onClose: () => void): void => {
   if (closeHandled) return;
   closeHandled = true;
   console.log('☠️ Pull request closed!');
+  if (checkTimeout) {
+    clearTimeout(checkTimeout);
+    checkTimeout = null;
+  }
+  if (cleanupTimeout) {
+    clearTimeout(cleanupTimeout);
+    cleanupTimeout = null;
+  }
   onClose();
   observer.disconnect();
 };
@@ -28,6 +39,14 @@ const checkExistingClosedState = (observer: MutationObserver, onClose: () => voi
 
 export const waitForCloseComplete = (onClose: () => void, timeoutMs: number = 10000): void => {
   closeHandled = false;
+  if (checkTimeout) {
+    clearTimeout(checkTimeout);
+    checkTimeout = null;
+  }
+  if (cleanupTimeout) {
+    clearTimeout(cleanupTimeout);
+    cleanupTimeout = null;
+  }
 
   const observer = new MutationObserver((mutations) => {
     if (closeHandled) return;
@@ -61,12 +80,16 @@ export const waitForCloseComplete = (onClose: () => void, timeoutMs: number = 10
     return;
   }
 
-  setTimeout(() => {
-    checkExistingClosedState(observer, onClose);
+  checkTimeout = setTimeout(() => {
+    if (!closeHandled) {
+      checkExistingClosedState(observer, onClose);
+    }
   }, 100);
 
-  setTimeout(() => {
-    observer.disconnect();
-    console.log('⏰ Close detection timeout');
+  cleanupTimeout = setTimeout(() => {
+    if (!closeHandled) {
+      observer.disconnect();
+      console.log('⏰ Close detection timeout');
+    }
   }, timeoutMs);
 };

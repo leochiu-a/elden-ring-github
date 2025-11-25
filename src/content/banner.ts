@@ -41,7 +41,11 @@ export const renderBanner = ({
 
     const asset = bannerAssetMap[type];
     const imgPath = chrome.runtime.getURL(`assets/${asset.image}`);
-    banner.innerHTML = `<img src="${imgPath}" alt="${asset.alt}">`;
+
+    const img = document.createElement('img');
+    img.src = imgPath;
+    img.alt = asset.alt;
+    banner.appendChild(img);
     document.body.appendChild(banner);
 
     if (soundEnabled) {
