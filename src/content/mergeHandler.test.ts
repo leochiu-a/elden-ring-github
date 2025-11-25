@@ -15,9 +15,7 @@ describe('mergeHandler', () => {
     observerCallback = null;
 
     class MockMutationObserver {
-      private callback: (mutations: MutationRecord[]) => void;
       constructor(cb: (mutations: MutationRecord[]) => void) {
-        this.callback = cb;
         observerCallback = cb;
       }
       observe() {}
@@ -27,18 +25,21 @@ describe('mergeHandler', () => {
     (globalThis as any).MutationObserver = MockMutationObserver;
   });
 
+  const createShowSettings = (): ShowSettings =>
+    new ShowSettings(() => ({
+      showOnPRMerged: true,
+      showOnPRCreate: true,
+      showOnPRApprove: true,
+      showOnPRClose: true,
+    }));
+
   it('should trigger onMerged when merged state appears', () => {
     Object.defineProperty(window, 'location', {
       value: { href: 'https://github.com/user/repo/pull/1' },
       writable: true,
     });
     const onMerged = vi.fn();
-    const showSettings = new ShowSettings(() => ({
-      showOnPRMerged: true,
-      showOnPRCreate: true,
-      showOnPRApprove: true,
-      showOnPRClose: true,
-    }));
+    const showSettings = createShowSettings();
     detectMergeButtons({
       showSettings,
       onMerged,
@@ -65,12 +66,7 @@ describe('mergeHandler', () => {
       writable: true,
     });
     const onMerged = vi.fn();
-    const showSettings = new ShowSettings(() => ({
-      showOnPRMerged: true,
-      showOnPRCreate: true,
-      showOnPRApprove: true,
-      showOnPRClose: true,
-    }));
+    const showSettings = createShowSettings();
     detectMergeButtons({
       showSettings,
       onMerged,
