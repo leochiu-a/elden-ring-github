@@ -9,6 +9,7 @@ A Chrome extension that displays epic Elden Ring-themed banners when you create,
 - 🆕 **PR Creation Banner** - Celebrate new pull request creation with a dedicated banner
 - ✅ **PR Approval Banner** - Epic celebration when you approve pull requests
 - 🎉 **PR Merge Banner** - Shows an epic "MERGE ACCOMPLISHED" banner when PRs are merged
+- ☠️ **PR Close Banner** - Dramatic "You Died" moment whenever a pull request is closed
 - 🔊 **Sound Effects** - Plays the iconic Elden Ring achievement sound
 - ⚙️ **Independent Controls** - Separate settings to enable/disable creation, approval, and merge banners
 
@@ -106,7 +107,8 @@ src/
     ├── lost-grace-discovered.mp3   # Lost Grace discovery sound
     ├── pull-request-created.png    # PR creation banner
     ├── pull-request-merged.png     # PR merge banner
-    ├── approve-pull-request.webp   # PR approval banner
+    ├── approve-pull-request.png    # PR approval banner
+    ├── close-pull-request.png      # PR close banner
     └── icon*.png        # Extension icons
 
 dist/                   # Built extension (Chrome loads this)
