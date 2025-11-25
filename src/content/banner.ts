@@ -63,8 +63,7 @@ export const renderBanner = ({
 
     return true;
   } catch (error) {
-    console.log('Image banner failed, using text banner:', error);
-    onHide();
+    console.error('Banner rendering failed:', error);
     return false;
   }
 };
