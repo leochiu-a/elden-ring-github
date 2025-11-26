@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { waitForCloseComplete } from './closeWatcher';
+import { waitForCloseCompletion } from './closeHandler';
 
 describe('waitForCloseComplete', () => {
   beforeEach(() => {
@@ -12,14 +12,14 @@ describe('waitForCloseComplete', () => {
     `;
 
     const onClose = vi.fn();
-    waitForCloseComplete(onClose);
+    waitForCloseCompletion(onClose);
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('should trigger callback when closed state is added later', async () => {
     const onClose = vi.fn();
-    waitForCloseComplete(onClose);
+    waitForCloseCompletion(onClose);
 
     const closedElement = document.createElement('span');
     closedElement.className = 'State State--closed';
