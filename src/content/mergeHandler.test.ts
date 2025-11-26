@@ -26,12 +26,17 @@ describe('mergeHandler', () => {
   });
 
   const createShowSettings = (): ShowSettings =>
-    new ShowSettings(() => ({
-      showOnPRMerged: true,
-      showOnPRCreate: true,
-      showOnPRApprove: true,
-      showOnPRClose: true,
-    }));
+    new ShowSettings(
+      {
+        soundEnabled: true,
+        soundType: 'you-die-sound',
+        showOnPRMerged: true,
+        showOnPRCreate: true,
+        showOnPRApprove: true,
+        showOnPRClose: true,
+      },
+      { autoInit: false },
+    );
 
   it('should trigger onMerged when merged state appears', () => {
     Object.defineProperty(window, 'location', {

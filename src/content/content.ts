@@ -6,8 +6,7 @@ import {
   CloseFeature,
   type GitHubFeature,
 } from './features';
-import { ShowSettings } from './showSettings';
-import { SettingsStore, type SettingsState } from './settingsStore';
+import { ShowSettings, type SettingsState } from './showSettings';
 
 class EldenRingOrchestrator {
   private bannerShown: boolean = false;
@@ -15,13 +14,11 @@ class EldenRingOrchestrator {
   private soundType: 'you-die-sound' | 'lost-grace-discovered' = 'you-die-sound';
   private soundUrl: string;
   private features: GitHubFeature[] = [];
-  private settingsStore = new SettingsStore();
-  private showSettings = new ShowSettings(() => this.settingsStore.getState());
+  private showSettings = new ShowSettings();
 
   constructor() {
     this.soundUrl = this.getSoundUrl();
-    this.subscribeToSettings();
-    this.settingsStore.init();
+    this.showSettings.subscribe((state) => this.applySettings(state));
     this.features = this.createFeatures();
     this.init();
   }
@@ -32,10 +29,6 @@ class EldenRingOrchestrator {
 
   private updateSoundUrl(): void {
     this.soundUrl = this.getSoundUrl();
-  }
-
-  private subscribeToSettings(): void {
-    this.settingsStore.subscribe((state) => this.applySettings(state));
   }
 
   private applySettings(state: SettingsState): void {
