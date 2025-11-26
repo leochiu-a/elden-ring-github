@@ -1,6 +1,6 @@
 {
   "name": "elden-ring-github",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "When a pull request is forged or a merge fulfilled, a grand banner rises in the style of Elden Ring — transmuting mere milestones of development into moments of legend.",
   "main": "dist/content.js",
   "scripts": {

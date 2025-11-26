@@ -1,5 +1,15 @@
 # elden-ring-github
 
+## 1.4.0
+
+### Minor Changes
+
+- 5f8ed57: Add a PR close banner option with settings toggle, popup control, and reusable banner rendering helper.
+
+### Patch Changes
+
+- 5439f7e: Refactor close detection module and consolidate settings management. Renamed `closeWatcher` to `closeHandler` for naming consistency and merged `SettingsStore` into `ShowSettings` to reduce unnecessary abstraction.
+
 ## 1.3.0
 
 ### Minor Changes
