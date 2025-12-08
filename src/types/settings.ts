@@ -1,3 +1,5 @@
+import type { SoundType } from './sounds';
+
 export interface EldenRingSettings {
   showOnPRMerged?: boolean;
   soundEnabled?: boolean;
@@ -5,5 +7,7 @@ export interface EldenRingSettings {
   showOnPRCreate?: boolean;
   showOnPRApprove?: boolean;
   showOnPRClose?: boolean;
-  soundType?: 'you-die-sound' | 'lost-grace-discovered';
+  soundType?: SoundType;
 }
+
+export type { SoundType };
