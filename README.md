@@ -76,6 +76,8 @@ Access settings by clicking the extension icon:
 - **🎵 Sound Type**: Choose between different celebration sounds:
   - **You Died** - The classic defeat sound
   - **Lost Grace Discovered** - The grace discovery sound
+  - **Flask of Crimson Tears** - Drink up after an epic fight
+  - **New Item Fanfare** - The loot discovery chime
 - **⏱️ Banner Duration**: Choose how long celebrations last (3-10 seconds)
 - **📊 Page Status**: See if you're currently on a GitHub page
 - **🧪 Test Banner**: Preview the banner effect anytime
@@ -105,6 +107,8 @@ src/
 └── assets/             # Static resources
     ├── you-die-sound.mp3           # "You Died" sound effect
     ├── lost-grace-discovered.mp3   # Lost Grace discovery sound
+    ├── flask-of-crimson-tears.mp3  # Flask of Crimson Tears refill
+    ├── new-item.mp3                # New item pickup fanfare
     ├── pull-request-created.png    # PR creation banner
     ├── pull-request-merged.png     # PR merge banner
     ├── approve-pull-request.png    # PR approval banner
