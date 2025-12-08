@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { SOUND_TYPES } from '../types/sounds';
 
 // Mock chrome API responses
 const mockChromeStorageGet = vi.fn();
@@ -170,18 +171,21 @@ describe('EldenRingOrchestrator', () => {
   });
 
   it('should support sound type selection', () => {
-    const soundTypes: Array<'you-die-sound' | 'lost-grace-discovered'> = [
-      'you-die-sound',
-      'lost-grace-discovered',
-    ];
-
-    soundTypes.forEach((soundType) => {
+    SOUND_TYPES.forEach((soundType) => {
       const expectedPath = `assets/${soundType}.mp3`;
       expect(expectedPath).toContain('.mp3');
       expect(expectedPath).toContain(soundType);
     });
 
-    expect(soundTypes.length).toBe(2);
+    expect(SOUND_TYPES).toEqual(
+      expect.arrayContaining([
+        'you-die-sound',
+        'lost-grace-discovered',
+        'flask-of-crimson-tears',
+        'new-item',
+      ]),
+    );
+    expect(SOUND_TYPES.length).toBe(4);
   });
 
   it('should add event listeners to merge buttons', () => {

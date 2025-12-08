@@ -1,6 +1,8 @@
+import type { SoundType } from '../types/sounds';
+
 export interface SettingsState {
   soundEnabled: boolean;
-  soundType: 'you-die-sound' | 'lost-grace-discovered';
+  soundType: SoundType;
   showOnPRMerged: boolean;
   showOnPRCreate: boolean;
   showOnPRApprove: boolean;

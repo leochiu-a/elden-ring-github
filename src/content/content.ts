@@ -7,11 +7,12 @@ import {
   type GitHubFeature,
 } from './features';
 import { ShowSettings, type SettingsState } from './showSettings';
+import type { SoundType } from '../types/settings';
 
 class EldenRingOrchestrator {
   private bannerShown: boolean = false;
   private soundEnabled: boolean = true;
-  private soundType: 'you-die-sound' | 'lost-grace-discovered' = 'you-die-sound';
+  private soundType: SoundType = 'you-die-sound';
   private soundUrl: string;
   private features: GitHubFeature[] = [];
   private showSettings = new ShowSettings();
