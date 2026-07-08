@@ -64,6 +64,12 @@
           </label>
         </div>
         <div class="setting-item">
+          <label class="setting-label setting-label-column" for="soundVolume">
+            Sound Volume:
+            <input id="soundVolume" type="range" min="0" max="100" step="5" value="100" />
+          </label>
+        </div>
+        <div class="setting-item">
           <label class="setting-label">
             Sound Type:
             <select id="soundType">
@@ -83,6 +89,17 @@
               <option value="7000">7 seconds</option>
               <option value="10000">10 seconds</option>
             </select>
+          </label>
+        </div>
+        <div class="setting-item">
+          <label class="setting-label setting-label-column" for="customBannerText">
+            Custom Banner Text:
+            <input
+              id="customBannerText"
+              type="text"
+              maxlength="48"
+              placeholder="e.g. MERGE ACCOMPLISHED"
+            />
           </label>
         </div>
       </div>

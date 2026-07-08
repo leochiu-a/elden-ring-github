@@ -19,11 +19,9 @@
   transform: translate(-50%, -50%) scale(1);
 }
 
-#elden-ring-banner img {
+.elden-ring-banner-canvas {
   width: 100vw;
-  max-width: 100vw;
-  height: auto;
-  filter: drop-shadow(0 0 10px black);
+  height: 100vh;
   display: block;
 }
 

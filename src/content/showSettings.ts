@@ -3,6 +3,8 @@ import type { SoundType } from '../types/sounds';
 export interface SettingsState {
   soundEnabled: boolean;
   soundType: SoundType;
+  soundVolume: number;
+  customBannerText: string;
   showOnPRMerged: boolean;
   showOnPRCreate: boolean;
   showOnPRApprove: boolean;
@@ -26,6 +28,8 @@ const STATE_KEY_MAP: Record<ShowSettingKey, keyof ShowSettingsFlags> = {
 const defaultState: SettingsState = {
   soundEnabled: true,
   soundType: 'you-die-sound',
+  soundVolume: 1,
+  customBannerText: '',
   showOnPRMerged: true,
   showOnPRCreate: true,
   showOnPRApprove: true,
@@ -51,6 +55,8 @@ export class ShowSettings {
       [
         'soundEnabled',
         'soundType',
+        'soundVolume',
+        'customBannerText',
         'showOnPRMerged',
         'showOnPRCreate',
         'showOnPRApprove',
@@ -60,6 +66,9 @@ export class ShowSettings {
         this.state = {
           soundEnabled: result.soundEnabled !== false,
           soundType: result.soundType || 'you-die-sound',
+          soundVolume: typeof result.soundVolume === 'number' ? result.soundVolume : 1,
+          customBannerText:
+            typeof result.customBannerText === 'string' ? result.customBannerText : '',
           showOnPRMerged: result.showOnPRMerged !== false,
           showOnPRCreate: result.showOnPRCreate !== false,
           showOnPRApprove: result.showOnPRApprove !== false,
@@ -79,6 +88,18 @@ export class ShowSettings {
       }
       if (changes.soundType) {
         nextState.soundType = changes.soundType.newValue;
+        updated = true;
+      }
+      if (changes.soundVolume) {
+        nextState.soundVolume =
+          typeof changes.soundVolume.newValue === 'number' ? changes.soundVolume.newValue : 1;
+        updated = true;
+      }
+      if (changes.customBannerText) {
+        nextState.customBannerText =
+          typeof changes.customBannerText.newValue === 'string'
+            ? changes.customBannerText.newValue
+            : '';
         updated = true;
       }
       if (changes.showOnPRMerged) {

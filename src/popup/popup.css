@@ -215,6 +215,32 @@ body {
   margin-left: 8px;
 }
 
+.setting-label-column {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.setting-label input[type='text'] {
+  width: 100%;
+  background: #1a1a1a;
+  border: 1px solid #d4af37;
+  color: #d4af37;
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+}
+
+.setting-label input[type='text']::placeholder {
+  color: rgba(212, 175, 55, 0.5);
+}
+
+.setting-label input[type='range'] {
+  width: 100%;
+  accent-color: #d4af37;
+  cursor: pointer;
+}
+
 .info-section {
   margin-bottom: 20px;
 }
