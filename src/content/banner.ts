@@ -1,3 +1,5 @@
+import { generateBannerDataUrl } from './eldenBanner';
+
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
 
 interface RenderBannerOptions {
@@ -8,23 +10,11 @@ interface RenderBannerOptions {
   onHide: () => void;
 }
 
-const bannerAssetMap: Record<BannerType, { image: string; alt: string }> = {
-  merged: {
-    image: 'pull-request-merged.png',
-    alt: 'Pull Request Merged',
-  },
-  created: {
-    image: 'pull-request-created.png',
-    alt: 'Pull Request Created',
-  },
-  approved: {
-    image: 'approve-pull-request.png',
-    alt: 'Pull Request Approved',
-  },
-  closed: {
-    image: 'close-pull-request.png',
-    alt: 'Pull Request Closed',
-  },
+const bannerCaptionMap: Record<BannerType, string> = {
+  merged: 'PULL REQUEST MERGED',
+  created: 'PULL REQUEST CREATED',
+  approved: 'PULL REQUEST APPROVED',
+  closed: 'PULL REQUEST CLOSED',
 };
 
 /**
@@ -41,12 +31,11 @@ export const renderBanner = ({
     const banner = document.createElement('div');
     banner.id = 'elden-ring-banner';
 
-    const asset = bannerAssetMap[type];
-    const imgPath = chrome.runtime.getURL(`assets/${asset.image}`);
+    const caption = bannerCaptionMap[type];
 
     const img = document.createElement('img');
-    img.src = imgPath;
-    img.alt = asset.alt;
+    img.src = generateBannerDataUrl(caption);
+    img.alt = caption;
     banner.appendChild(img);
     document.body.appendChild(banner);
 

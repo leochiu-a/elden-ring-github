@@ -117,7 +117,10 @@ document.addEventListener('DOMContentLoaded', (): void => {
   }
 });
 
-// Functions to be injected into the content script
+// Functions to be injected into the content script.
+// Must be fully self-contained: chrome.scripting.executeScript serializes only
+// this function's own source, so it cannot reference imports or other module-level
+// helpers (e.g. eldenBanner.ts) — the canvas drawing logic is inlined below.
 function createAndShowBanner(initialSoundVolume: number = 1): boolean {
   // Remove existing banner if any
   const existingBanner = document.querySelector('#elden-ring-banner, .elden-ring-merge-banner');
@@ -125,12 +128,84 @@ function createAndShowBanner(initialSoundVolume: number = 1): boolean {
     existingBanner.remove();
   }
 
+  function generateTestBannerDataUrl(caption: string): string {
+    const CANVAS_WIDTH = 1920;
+    const CANVAS_HEIGHT = 1080;
+    const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
+    const TEXT_COLOR = 'rgb(220, 175, 45)';
+    const SHEEN_COLOR = 'rgb(255, 208, 66)';
+    const SHADOW_SIZE = 0.7;
+    const SHADOW_OPACITY = 0.65;
+    const SHADOW_OFFSET = -0.006;
+    const SHADOW_SOFTNESS = 1.05;
+    const FONT_SIZE = 88;
+    const FONT_WEIGHT = 300;
+    const SHEEN_OPACITY = 0.18;
+    const SHEEN_SIZE = 1.11;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = CANVAS_WIDTH;
+    canvas.height = CANVAS_HEIGHT;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return '';
+    }
+
+    const scale = canvas.height / 1080;
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
+
+    // Shadow bar
+    ctx.save();
+    ctx.filter = `blur(${SHADOW_SOFTNESS * 12 * scale}px)`;
+    const barHeight = canvas.height * SHADOW_SIZE * 0.15;
+    const gradient = ctx.createLinearGradient(
+      0,
+      centerY - barHeight / 2,
+      0,
+      centerY + barHeight / 2,
+    );
+    gradient.addColorStop(0, `rgba(20, 20, 20, 0)`);
+    gradient.addColorStop(0.5, `rgba(20, 20, 20, ${SHADOW_OPACITY})`);
+    gradient.addColorStop(1, `rgba(20, 20, 20, 0)`);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, centerY - barHeight / 2, canvas.width, barHeight);
+    ctx.restore();
+
+    const applyFontSliders = () => {
+      const fontSize = FONT_SIZE * scale;
+      ctx.font = `${FONT_WEIGHT} ${fontSize}px ${FONT_FAMILY}`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+    };
+
+    // Main text
+    ctx.save();
+    applyFontSliders();
+    ctx.fillStyle = TEXT_COLOR;
+    ctx.fillText(caption, centerX, centerY);
+    ctx.restore();
+
+    // Additive sheen pass
+    ctx.save();
+    applyFontSliders();
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.globalAlpha = SHEEN_OPACITY;
+    ctx.fillStyle = SHEEN_COLOR;
+    ctx.translate(centerX, centerY);
+    ctx.scale(SHEEN_SIZE, 1 + (SHEEN_SIZE - 1) / 2);
+    ctx.fillText(caption, 0, 0);
+    ctx.restore();
+
+    return canvas.toDataURL('image/png');
+  }
+
   // Try to create image banner first
   try {
     const banner = document.createElement('div');
     banner.id = 'elden-ring-banner';
-    const imgPath = chrome.runtime.getURL('assets/approve-pull-request.png');
-    banner.innerHTML = `<img src="${imgPath}" alt="Pull Request Approved">`;
+    const dataUrl = generateTestBannerDataUrl('PULL REQUEST APPROVED');
+    banner.innerHTML = `<img src="${dataUrl}" alt="Pull Request Approved">`;
     document.body.appendChild(banner);
 
     // Play sound effect if enabled
