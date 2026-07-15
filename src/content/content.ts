@@ -14,7 +14,6 @@ class EldenRingOrchestrator {
   private soundEnabled: boolean = true;
   private soundType: SoundType = 'you-die-sound';
   private soundVolume: number = 1;
-  private customBannerText: string = '';
   private soundUrl: string;
   private features: GitHubFeature[] = [];
   private showSettings = new ShowSettings();
@@ -38,7 +37,6 @@ class EldenRingOrchestrator {
     this.soundEnabled = state.soundEnabled;
     this.soundType = state.soundType;
     this.soundVolume = state.soundVolume;
-    this.customBannerText = state.customBannerText;
     this.updateSoundUrl();
   }
 
@@ -80,7 +78,6 @@ class EldenRingOrchestrator {
       soundUrl: defaultSoundUrl,
       soundEnabled: this.soundEnabled,
       soundVolume: this.soundVolume,
-      customText: this.customBannerText,
       onHide: () => {
         this.bannerShown = false;
       },

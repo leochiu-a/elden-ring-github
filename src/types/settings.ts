@@ -9,7 +9,6 @@ export interface EldenRingSettings {
   showOnPRClose?: boolean;
   soundType?: SoundType;
   soundVolume?: number;
-  customBannerText?: string;
 }
 
 export type { SoundType };

@@ -3,37 +3,7 @@ import { renderBanner, type BannerType } from './banner';
 
 describe('renderBanner', () => {
   const soundUrl = 'chrome-extension://mock/sound.mp3';
-  let originalGetContext: typeof HTMLCanvasElement.prototype.getContext;
   let audioInstances: HTMLAudioElement[];
-
-  const createMockGradient = () => ({
-    addColorStop: vi.fn(),
-  });
-
-  const createMockContext = () =>
-    ({
-      setTransform: vi.fn(),
-      clearRect: vi.fn(),
-      createRadialGradient: vi.fn().mockImplementation(createMockGradient),
-      fillRect: vi.fn(),
-      save: vi.fn(),
-      restore: vi.fn(),
-      translate: vi.fn(),
-      rotate: vi.fn(),
-      beginPath: vi.fn(),
-      arc: vi.fn(),
-      stroke: vi.fn(),
-      strokeText: vi.fn(),
-      fillText: vi.fn(),
-      textAlign: 'center',
-      textBaseline: 'middle',
-      lineWidth: 0,
-      fillStyle: '',
-      strokeStyle: '',
-      font: '',
-      shadowBlur: 0,
-      shadowColor: '',
-    }) as unknown as CanvasRenderingContext2D;
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -55,14 +25,10 @@ describe('renderBanner', () => {
       audioInstances.push(instance);
       return instance;
     });
-
-    originalGetContext = HTMLCanvasElement.prototype.getContext;
-    HTMLCanvasElement.prototype.getContext = vi.fn().mockImplementation(() => createMockContext());
   });
 
   afterEach(() => {
     vi.useRealTimers();
-    HTMLCanvasElement.prototype.getContext = originalGetContext;
   });
 
   it('should render banners for each type', () => {
@@ -79,7 +45,9 @@ describe('renderBanner', () => {
 
       const banner = document.getElementById('elden-ring-banner');
       expect(banner).toBeTruthy();
-      expect(banner?.querySelector('canvas')).toBeTruthy();
+      expect(banner?.innerHTML).toContain('.png');
+      const chromeRuntime = (globalThis as any).chrome.runtime;
+      expect(chromeRuntime.getURL).toHaveBeenCalled();
 
       vi.runAllTimers();
       expect(onHide).toHaveBeenCalled();
@@ -100,47 +68,6 @@ describe('renderBanner', () => {
     expect(global.Audio).not.toHaveBeenCalled();
     vi.runAllTimers();
     expect(onHide).toHaveBeenCalled();
-  });
-
-  it('should use custom text when provided', () => {
-    const onHide = vi.fn();
-    renderBanner({
-      type: 'merged',
-      soundUrl,
-      soundEnabled: false,
-      customText: 'LEGENDARY DEPLOY',
-      onHide,
-    });
-
-    const canvas = document.querySelector('canvas');
-    expect(canvas).toBeTruthy();
-    vi.runOnlyPendingTimers();
-    expect(onHide).not.toHaveBeenCalled();
-  });
-
-  it('should fall back to default text when customText is blank', () => {
-    renderBanner({
-      type: 'merged',
-      soundUrl,
-      soundEnabled: false,
-      customText: '   ',
-      onHide: vi.fn(),
-    });
-
-    expect(document.getElementById('elden-ring-banner')).toBeTruthy();
-  });
-
-  it('should truncate customText beyond 48 characters', () => {
-    const longText = 'A'.repeat(60);
-    renderBanner({
-      type: 'merged',
-      soundUrl,
-      soundEnabled: false,
-      customText: longText,
-      onHide: vi.fn(),
-    });
-
-    expect(document.getElementById('elden-ring-banner')).toBeTruthy();
   });
 
   it('defaults audio volume to 1 when soundVolume is not provided', () => {
