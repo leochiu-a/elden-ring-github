@@ -1,5 +1,6 @@
 import { ShowSettings } from './showSettings';
 import { isPullRequestPage } from './pageUtils';
+import { MERGE_POLL_INTERVAL_MS, MERGE_DETECTION_TIMEOUT_MS } from './constants';
 
 export interface MergeHandlerOptions {
   showSettings: ShowSettings;
@@ -11,78 +12,72 @@ export const detectMergeButtons = (options: MergeHandlerOptions): void => {
     return;
   }
 
-  const mergePrContainer = document.querySelector('.merge-pr');
+  const mergePrContainer = document.querySelector('[data-testid="mergebox-border-container"]');
   if (!mergePrContainer) {
     return;
   }
 
-  const buttons = mergePrContainer.querySelectorAll('button');
-  buttons.forEach((button) => {
-    const buttonText = button.textContent?.toLowerCase().trim() || '';
-    const specificMergeTexts = [
-      'confirm merge',
-      'confirm squash and merge',
-      'confirm rebase and merge',
-    ];
+  const specificMergeTexts = [
+    'confirm merge',
+    'confirm squash and merge',
+    'confirm rebase and merge',
+  ];
 
-    if (
-      specificMergeTexts.some((text) => buttonText.includes(text)) &&
-      !button.hasAttribute('data-elden-ring-listener')
-    ) {
-      button.addEventListener('click', () => {
-        console.log('🎯 Merge button clicked:', buttonText);
-        waitForMergeComplete(options);
-      });
-      button.setAttribute('data-elden-ring-listener', 'true');
+  const buttons = mergePrContainer.querySelectorAll(
+    'button[data-component="Button"][data-variant="primary"]',
+  );
+  buttons.forEach((button) => {
+    if (button.hasAttribute('data-elden-ring-listener')) {
+      return;
     }
+
+    const buttonText = button.textContent?.toLowerCase().trim() || '';
+    if (!specificMergeTexts.some((text) => buttonText.includes(text))) {
+      return;
+    }
+
+    button.addEventListener('click', () => {
+      console.log('🎯 Merge button clicked:', buttonText);
+      waitForMergeComplete(options);
+    });
+    button.setAttribute('data-elden-ring-listener', 'true');
   });
 };
+
+const MERGED_STATE_SELECTOR = '[data-component="StateLabel"][data-status="pullMerged"]';
+
+let activeMergePollId: ReturnType<typeof setInterval> | null = null;
 
 const waitForMergeComplete = (options: MergeHandlerOptions): void => {
   const { showSettings, onMerged } = options;
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType === Node.ELEMENT_NODE) {
-          const element = node as Element;
-          if (
-            element.querySelector('.State.State--merged') ||
-            element.matches('.State.State--merged')
-          ) {
-            console.log('✅ Merge completed successfully!');
-            if (showSettings.isEnabled('merged')) {
-              onMerged();
-            } else {
-              console.log('🚫 PR merge banner disabled in settings');
-            }
-            observer.disconnect();
-          }
-        }
-      });
-    });
-  });
+  if (activeMergePollId !== null) {
+    clearInterval(activeMergePollId);
+  }
 
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
+  const stopPolling = (): void => {
+    clearInterval(intervalId);
+    clearTimeout(timeoutId);
+    activeMergePollId = null;
+  };
 
-  setTimeout(() => {
-    const mergedElement = document.querySelector('.State.State--merged');
-    if (mergedElement) {
-      console.log('✅ Merge state already present!');
-      if (showSettings.isEnabled('merged')) {
-        onMerged();
-      } else {
-        console.log('🚫 PR merge banner disabled in settings');
-      }
-      observer.disconnect();
+  const intervalId = setInterval(() => {
+    if (!document.querySelector(MERGED_STATE_SELECTOR)) {
+      return;
     }
-  }, 100);
+    stopPolling();
+    console.log('✅ Merge completed successfully!');
+    if (showSettings.isEnabled('merged')) {
+      onMerged();
+    } else {
+      console.log('🚫 PR merge banner disabled in settings');
+    }
+  }, MERGE_POLL_INTERVAL_MS);
 
-  setTimeout(() => {
-    observer.disconnect();
+  const timeoutId = setTimeout(() => {
+    stopPolling();
     console.log('⏰ Merge detection timeout');
-  }, 10000);
+  }, MERGE_DETECTION_TIMEOUT_MS);
+
+  activeMergePollId = intervalId;
 };
