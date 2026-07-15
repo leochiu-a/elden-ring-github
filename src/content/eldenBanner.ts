@@ -3,8 +3,11 @@
  * ported from https://sibert-aerts.github.io/new-area/image-creator/ (js/drawFunctions.js).
  */
 
-const CANVAS_WIDTH = 1920;
-const CANVAS_HEIGHT = 1080;
+// Rendered at 2x (3840x2160) so the banner stays sharp when CSS upscales it to
+// full viewport width on 2K/high-DPI displays. All draw sizes derive from
+// canvas.height / 1080, so the higher resolution keeps proportions identical.
+const CANVAS_WIDTH = 3840;
+const CANVAS_HEIGHT = 2160;
 
 const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
 const TEXT_COLOR = 'rgb(220, 175, 45)';
