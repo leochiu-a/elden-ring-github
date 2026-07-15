@@ -10,8 +10,8 @@ const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
 const TEXT_COLOR = 'rgb(220, 175, 45)';
 const SHEEN_COLOR = 'rgb(255, 208, 66)';
 
-const SHADOW_SIZE = 1.3;
-const SHADOW_OPACITY = 0.55;
+const SHADOW_SIZE = 0.85;
+const SHADOW_OPACITY = 1;
 const SHADOW_OFFSET = -0.006;
 const SHADOW_SOFTNESS = 1.1;
 
