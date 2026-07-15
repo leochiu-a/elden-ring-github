@@ -110,5 +110,19 @@ class EldenRingOrchestrator {
   }
 }
 
-// Initialize the extension
-new EldenRingOrchestrator();
+// Initialize the extension. Guarded so that if the popup re-injects this file
+// via chrome.scripting.executeScript (e.g. into a tab whose content script
+// predates the latest build), we don't spawn a second orchestrator/observer.
+if (!window.__eldenRingLoaded) {
+  window.__eldenRingLoaded = true;
+
+  const orchestrator = new EldenRingOrchestrator();
+
+  // Lets the popup's "Test Merge" button reuse the exact same banner rendering
+  // path as real PR events, instead of duplicating it.
+  chrome.runtime.onMessage.addListener((message: { type?: string }) => {
+    if (message?.type === 'ELDEN_RING_TEST_BANNER') {
+      orchestrator.showEldenRingBanner('approved');
+    }
+  });
+}

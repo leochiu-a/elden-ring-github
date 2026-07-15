@@ -45,18 +45,33 @@ document.addEventListener('DOMContentLoaded', (): void => {
     });
   }
 
+  const TEST_BANNER_MESSAGE = { type: 'ELDEN_RING_TEST_BANNER' };
+
   function showTestBanner() {
-    const soundVolume = soundVolumeInput ? parseInt(soundVolumeInput.value, 10) / 100 : 1;
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      const currentTab = tabs[0];
-      if (currentTab) {
-        // Inject the banner directly into the current tab
-        chrome.scripting.executeScript({
-          target: { tabId: currentTab.id! },
-          func: createAndShowBanner,
-          args: [soundVolume],
+      const tabId = tabs[0]?.id;
+      if (tabId === undefined) return;
+
+      // Ask the content script to render the banner via its normal code path
+      // (banner.ts/eldenBanner.ts) instead of duplicating that logic here.
+      chrome.tabs.sendMessage(tabId, TEST_BANNER_MESSAGE, () => {
+        if (!chrome.runtime.lastError) return;
+
+        // No receiver yet (tab opened before this build, or content script not
+        // injected on this page). Inject the current content script, then retry.
+        chrome.scripting.insertCSS({ target: { tabId }, files: ['content/styles.css'] });
+        chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] }, () => {
+          if (chrome.runtime.lastError) {
+            console.log('Failed to inject content script:', chrome.runtime.lastError.message);
+            return;
+          }
+          chrome.tabs.sendMessage(tabId, TEST_BANNER_MESSAGE, () => {
+            if (chrome.runtime.lastError) {
+              console.log('Failed to trigger test banner:', chrome.runtime.lastError.message);
+            }
+          });
         });
-      }
+      });
     });
   }
 
@@ -117,174 +132,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
   }
 });
 
-// Functions to be injected into the content script.
-// Must be fully self-contained: chrome.scripting.executeScript serializes only
-// this function's own source, so it cannot reference imports or other module-level
-// helpers (e.g. eldenBanner.ts) — the canvas drawing logic is inlined below.
-function createAndShowBanner(initialSoundVolume: number = 1): boolean {
-  // Remove existing banner if any
-  const existingBanner = document.querySelector('#elden-ring-banner, .elden-ring-merge-banner');
-  if (existingBanner) {
-    existingBanner.remove();
-  }
-
-  function generateTestBannerDataUrl(caption: string): string {
-    const CANVAS_WIDTH = 1920;
-    const CANVAS_HEIGHT = 1080;
-    const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
-    const TEXT_COLOR = 'rgb(220, 175, 45)';
-    const SHEEN_COLOR = 'rgb(255, 208, 66)';
-    const SHADOW_SIZE = 0.7;
-    const SHADOW_OPACITY = 0.65;
-    const SHADOW_OFFSET = -0.006;
-    const SHADOW_SOFTNESS = 1.05;
-    const FONT_SIZE = 88;
-    const FONT_WEIGHT = 300;
-    const SHEEN_OPACITY = 0.18;
-    const SHEEN_SIZE = 1.11;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = CANVAS_WIDTH;
-    canvas.height = CANVAS_HEIGHT;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return '';
-    }
-
-    const scale = canvas.height / 1080;
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
-
-    // Shadow bar
-    ctx.save();
-    ctx.filter = `blur(${SHADOW_SOFTNESS * 12 * scale}px)`;
-    const barHeight = canvas.height * SHADOW_SIZE * 0.15;
-    const gradient = ctx.createLinearGradient(
-      0,
-      centerY - barHeight / 2,
-      0,
-      centerY + barHeight / 2,
-    );
-    gradient.addColorStop(0, `rgba(20, 20, 20, 0)`);
-    gradient.addColorStop(0.5, `rgba(20, 20, 20, ${SHADOW_OPACITY})`);
-    gradient.addColorStop(1, `rgba(20, 20, 20, 0)`);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, centerY - barHeight / 2, canvas.width, barHeight);
-    ctx.restore();
-
-    const applyFontSliders = () => {
-      const fontSize = FONT_SIZE * scale;
-      ctx.font = `${FONT_WEIGHT} ${fontSize}px ${FONT_FAMILY}`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-    };
-
-    // Main text
-    ctx.save();
-    applyFontSliders();
-    ctx.fillStyle = TEXT_COLOR;
-    ctx.fillText(caption, centerX, centerY);
-    ctx.restore();
-
-    // Additive sheen pass
-    ctx.save();
-    applyFontSliders();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = SHEEN_OPACITY;
-    ctx.fillStyle = SHEEN_COLOR;
-    ctx.translate(centerX, centerY);
-    ctx.scale(SHEEN_SIZE, 1 + (SHEEN_SIZE - 1) / 2);
-    ctx.fillText(caption, 0, 0);
-    ctx.restore();
-
-    return canvas.toDataURL('image/png');
-  }
-
-  // Try to create image banner first
-  try {
-    const banner = document.createElement('div');
-    banner.id = 'elden-ring-banner';
-    const dataUrl = generateTestBannerDataUrl('PULL REQUEST APPROVED');
-    banner.innerHTML = `<img src="${dataUrl}" alt="Pull Request Approved">`;
-    document.body.appendChild(banner);
-
-    // Play sound effect if enabled
-    chrome.storage.sync.get(['soundEnabled', 'soundType'], function (soundResult) {
-      if (soundResult.soundEnabled !== false) {
-        const soundType = soundResult.soundType || 'you-die-sound';
-        const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = Math.min(1, Math.max(0, initialSoundVolume));
-        audio.play().catch((err) => console.log('Sound playback failed:', err));
-      }
-    });
-
-    setTimeout(() => banner.classList.add('show'), 50);
-
-    // Auto-hide after duration
-    chrome.storage.sync.get(['duration'], function (result) {
-      const duration = result.duration || 5000;
-      setTimeout(() => {
-        if (banner && banner.parentNode) {
-          banner.classList.remove('show');
-          setTimeout(() => {
-            if (banner.parentNode) {
-              banner.remove();
-            }
-          }, 500);
-        }
-      }, duration);
-    });
-
-    return true;
-  } catch (error) {
-    console.error('Image banner failed, creating fallback text banner', error);
-
-    // Create fallback text banner
-    const banner = document.createElement('div');
-    banner.className = 'elden-ring-merge-banner';
-    banner.innerHTML = `
-            <div class="elden-ring-banner-content">
-                <div class="elden-ring-text">
-                    <h1>MERGE ACCOMPLISHED</h1>
-                    <p>Test banner activated from extension popup</p>
-                </div>
-                <div class="elden-ring-close" onclick="this.parentElement.parentElement.remove()">×</div>
-            </div>
-        `;
-
-    document.body.appendChild(banner);
-
-    // Play sound effect if enabled
-    chrome.storage.sync.get(['soundEnabled', 'soundType'], function (soundResult) {
-      if (soundResult.soundEnabled !== false) {
-        const soundType = soundResult.soundType || 'you-die-sound';
-        const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = Math.min(1, Math.max(0, initialSoundVolume));
-        audio.play().catch((err) => console.log('Sound playback failed:', err));
-      }
-    });
-
-    setTimeout(() => banner.classList.add('show'), 50);
-
-    // Auto-hide after duration
-    chrome.storage.sync.get(['duration'], function (result) {
-      const duration = result.duration || 5000;
-      setTimeout(() => {
-        if (banner && banner.parentNode) {
-          banner.classList.remove('show');
-          setTimeout(() => {
-            if (banner.parentNode) {
-              banner.remove();
-            }
-          }, 500);
-        }
-      }, duration);
-    });
-
-    return true;
-  }
-}
-
+// Function to be injected into the content script via chrome.scripting.executeScript.
+// Must be fully self-contained: only this function's own source is serialized,
+// so it cannot reference imports or other module-level helpers.
 function updateExtensionSettings(settings: EldenRingSettings): void {
   // Update the extension's settings in the content script
   if (window.eldenRingMergerSettings) {

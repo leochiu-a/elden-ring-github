@@ -10,10 +10,10 @@ const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
 const TEXT_COLOR = 'rgb(220, 175, 45)';
 const SHEEN_COLOR = 'rgb(255, 208, 66)';
 
-const SHADOW_SIZE = 0.7;
-const SHADOW_OPACITY = 0.65;
+const SHADOW_SIZE = 1.3;
+const SHADOW_OPACITY = 0.55;
 const SHADOW_OFFSET = -0.006;
-const SHADOW_SOFTNESS = 1.05;
+const SHADOW_SOFTNESS = 1.1;
 
 const FONT_SIZE = 88;
 const FONT_WEIGHT = 300;
@@ -23,7 +23,7 @@ const SHEEN_SIZE = 1.11;
 
 const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void => {
   const scale = canvas.height / 1080;
-  const barHeight = canvas.height * SHADOW_SIZE * 0.15;
+  const barHeight = canvas.height * SHADOW_SIZE * 0.18;
   const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
 
   ctx.save();

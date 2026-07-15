@@ -184,28 +184,27 @@ describe('Popup functionality', () => {
     });
   });
 
-  it('should execute test banner script', () => {
-    const mockExecuteScript = vi.fn();
+  it('should send a test-banner message to the active tab instead of injecting duplicate rendering logic', () => {
+    const mockSendMessage = vi.fn();
     const mockQuery = vi.fn().mockImplementation((_queryInfo, callback) => {
       callback([{ id: 123 }]);
     });
 
-    global.chrome.scripting.executeScript = mockExecuteScript;
+    global.chrome.tabs.sendMessage = mockSendMessage;
     global.chrome.tabs.query = mockQuery;
 
-    // Simulate showTestBanner function
+    // Simulate showTestBanner function: delegate to the content script's
+    // real renderBanner/eldenBanner code path via messaging.
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const currentTab = tabs[0];
-      if (currentTab) {
-        chrome.scripting.executeScript({
-          target: { tabId: currentTab.id! },
-          func: () => {}, // Mock function
-        });
+      if (currentTab?.id) {
+        chrome.tabs.sendMessage(currentTab.id, { type: 'ELDEN_RING_TEST_BANNER' }, () => {});
 
-        expect(mockExecuteScript).toHaveBeenCalledWith({
-          target: { tabId: 123 },
-          func: expect.any(Function),
-        });
+        expect(mockSendMessage).toHaveBeenCalledWith(
+          123,
+          { type: 'ELDEN_RING_TEST_BANNER' },
+          expect.any(Function),
+        );
       }
     });
 
@@ -213,49 +212,6 @@ describe('Popup functionality', () => {
       { active: true, currentWindow: true },
       expect.any(Function),
     );
-  });
-
-  it('should handle banner creation and removal', () => {
-    // Mock chrome.runtime.getURL
-    global.chrome.runtime.getURL = vi.fn((path) => `chrome-extension://mock/${path}`);
-
-    // Test banner creation
-    const banner = document.createElement('div');
-    banner.id = 'elden-ring-banner';
-    const imgPath = chrome.runtime.getURL('assets/pull-request-merged.png');
-    banner.innerHTML = `<img src="${imgPath}" alt="Pull Request Merged">`;
-    document.body.appendChild(banner);
-
-    expect(document.querySelector('#elden-ring-banner')).toBeTruthy();
-
-    // Test banner removal
-    const existingBanner = document.querySelector('#elden-ring-banner, .elden-ring-merge-banner');
-    if (existingBanner) {
-      existingBanner.remove();
-    }
-
-    expect(document.querySelector('#elden-ring-banner')).toBeNull();
-  });
-
-  it('should handle fallback text banner', () => {
-    // Simulate error in image banner creation and fallback to text banner
-    const banner = document.createElement('div');
-    banner.className = 'elden-ring-merge-banner';
-    banner.innerHTML = `
-      <div class="elden-ring-banner-content">
-        <div class="elden-ring-text">
-          <h1>MERGE ACCOMPLISHED</h1>
-          <p>Test banner activated from extension popup</p>
-        </div>
-        <div class="elden-ring-close" onclick="this.parentElement.parentElement.remove()">×</div>
-      </div>
-    `;
-
-    document.body.appendChild(banner);
-
-    expect(document.querySelector('.elden-ring-merge-banner')).toBeTruthy();
-    expect(banner.innerHTML).toContain('MERGE ACCOMPLISHED');
-    expect(banner.innerHTML).toContain('Test banner activated from extension popup');
   });
 
   it('should handle settings update injection', () => {
