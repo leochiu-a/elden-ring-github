@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   const showOnPRCreateCheckbox = document.getElementById('showOnPRCreate') as HTMLInputElement;
   const showOnPRApproveCheckbox = document.getElementById('showOnPRApprove') as HTMLInputElement;
   const showOnPRCloseCheckbox = document.getElementById('showOnPRClose') as HTMLInputElement;
+  const soundVolumeInput = document.getElementById('soundVolume') as HTMLInputElement;
   const soundTypeSelect = document.getElementById('soundType') as HTMLSelectElement;
   const durationSelect = document.getElementById('duration') as HTMLSelectElement;
   const pageStatusElement = document.getElementById('pageStatus') as HTMLSpanElement;
@@ -24,6 +25,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   showOnPRCreateCheckbox?.addEventListener('change', saveSettings);
   showOnPRApproveCheckbox?.addEventListener('change', saveSettings);
   showOnPRCloseCheckbox?.addEventListener('change', saveSettings);
+  soundVolumeInput?.addEventListener('change', saveSettings);
   soundTypeSelect?.addEventListener('change', saveSettings);
   durationSelect?.addEventListener('change', saveSettings);
 
@@ -44,6 +46,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
   }
 
   function showTestBanner() {
+    const soundVolume = soundVolumeInput ? parseInt(soundVolumeInput.value, 10) / 100 : 1;
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       const currentTab = tabs[0];
       if (currentTab) {
@@ -51,6 +54,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         chrome.scripting.executeScript({
           target: { tabId: currentTab.id! },
           func: createAndShowBanner,
+          args: [soundVolume],
         });
       }
     });
@@ -64,6 +68,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
         'showOnPRCreate',
         'showOnPRApprove',
         'soundType',
+        'soundVolume',
         'duration',
         'showOnPRClose',
       ],
@@ -74,6 +79,9 @@ document.addEventListener('DOMContentLoaded', (): void => {
         showOnPRApproveCheckbox.checked = result.showOnPRApprove !== false; // default true
         showOnPRCloseCheckbox.checked = result.showOnPRClose !== false; // default true
         soundTypeSelect.value = result.soundType || 'you-die-sound'; // default you-die-sound
+        soundVolumeInput.value = String(
+          typeof result.soundVolume === 'number' ? Math.round(result.soundVolume * 100) : 100,
+        ); // default 100%
         durationSelect.value = result.duration || '5000'; // default 5 seconds
       },
     );
@@ -87,6 +95,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
       showOnPRApprove: showOnPRApproveCheckbox.checked,
       showOnPRClose: showOnPRCloseCheckbox.checked,
       soundType: soundTypeSelect.value,
+      soundVolume: parseInt(soundVolumeInput.value, 10) / 100,
       duration: parseInt(durationSelect.value),
     };
 
@@ -109,7 +118,7 @@ document.addEventListener('DOMContentLoaded', (): void => {
 });
 
 // Functions to be injected into the content script
-function createAndShowBanner(): boolean {
+function createAndShowBanner(initialSoundVolume: number = 1): boolean {
   // Remove existing banner if any
   const existingBanner = document.querySelector('#elden-ring-banner, .elden-ring-merge-banner');
   if (existingBanner) {
@@ -129,7 +138,7 @@ function createAndShowBanner(): boolean {
       if (soundResult.soundEnabled !== false) {
         const soundType = soundResult.soundType || 'you-die-sound';
         const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = 1.0;
+        audio.volume = Math.min(1, Math.max(0, initialSoundVolume));
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
     });
@@ -175,7 +184,7 @@ function createAndShowBanner(): boolean {
       if (soundResult.soundEnabled !== false) {
         const soundType = soundResult.soundType || 'you-die-sound';
         const audio = new Audio(chrome.runtime.getURL(`assets/${soundType}.mp3`));
-        audio.volume = 1.0;
+        audio.volume = Math.min(1, Math.max(0, initialSoundVolume));
         audio.play().catch((err) => console.log('Sound playback failed:', err));
       }
     });

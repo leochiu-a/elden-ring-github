@@ -3,6 +3,7 @@ import { renderBanner, type BannerType } from './banner';
 
 describe('renderBanner', () => {
   const soundUrl = 'chrome-extension://mock/sound.mp3';
+  let audioInstances: HTMLAudioElement[];
 
   beforeEach(() => {
     document.body.innerHTML = '';
@@ -15,11 +16,14 @@ describe('renderBanner', () => {
     chromeGlobal.chrome.runtime = chromeGlobal.chrome.runtime || {};
     chromeGlobal.chrome.runtime.getURL = vi.fn((path: string) => `chrome-extension://mock/${path}`);
 
+    audioInstances = [];
     global.Audio = vi.fn().mockImplementation(() => {
-      return {
+      const instance = {
         play: vi.fn().mockResolvedValue(undefined),
         volume: 0,
       } as unknown as HTMLAudioElement;
+      audioInstances.push(instance);
+      return instance;
     });
   });
 
@@ -64,5 +68,36 @@ describe('renderBanner', () => {
     expect(global.Audio).not.toHaveBeenCalled();
     vi.runAllTimers();
     expect(onHide).toHaveBeenCalled();
+  });
+
+  it('defaults audio volume to 1 when soundVolume is not provided', () => {
+    renderBanner({
+      type: 'merged',
+      soundUrl,
+      soundEnabled: true,
+      onHide: vi.fn(),
+    });
+
+    expect(audioInstances).toHaveLength(1);
+    expect(audioInstances[0]!.volume).toBe(1);
+  });
+
+  it.each([
+    [0, 0],
+    [0.5, 0.5],
+    [1, 1],
+    [1.5, 1],
+    [-0.2, 0],
+  ])('clamps soundVolume %s to %s', (input, expected) => {
+    renderBanner({
+      type: 'merged',
+      soundUrl,
+      soundEnabled: true,
+      soundVolume: input,
+      onHide: vi.fn(),
+    });
+
+    expect(audioInstances).toHaveLength(1);
+    expect(audioInstances[0]!.volume).toBe(expected);
   });
 });

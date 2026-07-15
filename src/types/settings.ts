@@ -8,6 +8,7 @@ export interface EldenRingSettings {
   showOnPRApprove?: boolean;
   showOnPRClose?: boolean;
   soundType?: SoundType;
+  soundVolume?: number;
 }
 
 export type { SoundType };

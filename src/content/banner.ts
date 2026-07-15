@@ -4,6 +4,7 @@ interface RenderBannerOptions {
   type: BannerType;
   soundUrl: string;
   soundEnabled: boolean;
+  soundVolume?: number;
   onHide: () => void;
 }
 
@@ -33,6 +34,7 @@ export const renderBanner = ({
   type,
   soundUrl,
   soundEnabled,
+  soundVolume,
   onHide,
 }: RenderBannerOptions): boolean => {
   try {
@@ -50,7 +52,7 @@ export const renderBanner = ({
 
     if (soundEnabled) {
       const audio = new Audio(soundUrl);
-      audio.volume = 1.0;
+      audio.volume = Math.min(1, Math.max(0, soundVolume ?? 1));
       audio.play().catch((err) => console.log('Sound playback failed:', err));
     }
 
