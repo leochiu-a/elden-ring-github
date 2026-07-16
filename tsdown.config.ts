@@ -43,9 +43,15 @@ const copyStaticPlugin = {
   },
 };
 
+// Both bundles are ES modules (`.mjs`). The content module is injected via a
+// dynamic-import loader (see content-loader.js); the popup module is loaded with
+// <script type="module"> from popup.html. Module scope keeps top-level
+// declarations out of the content script's shared isolated-world scope, and
+// `chrome` stays a free global reference in both.
 const shared = {
   outDir: 'dist',
   external: ['chrome'],
+  format: 'esm' as const,
   clean: false, // `prebuild` handles cleaning so the two runs don't wipe each other
   plugins: [copyStaticPlugin],
 };
@@ -55,16 +61,10 @@ export default defineConfig(
     ? {
         ...shared,
         entry: ['src/content/content.ts'],
-        // ES module: its declarations live in module scope (never the shared
-        // isolated-world scope) and it is evaluated once per URL. The manifest
-        // injects content-loader.js, which dynamically imports this bundle, so
-        // re-injection can't redeclare identifiers. `chrome` stays a free global.
-        format: ['esm'] as const,
       }
     : {
         ...shared,
         entry: ['src/popup/popup.tsx'],
-        format: ['cjs'] as const,
         alias: {
           'react/jsx-runtime': 'preact/jsx-runtime',
           'react/jsx-dev-runtime': 'preact/jsx-runtime',
