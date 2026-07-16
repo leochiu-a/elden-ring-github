@@ -1,124 +1,75 @@
 import { ShowSettings } from './showSettings';
 import { isPullRequestPage } from './pageUtils';
-import { CLOSE_DETECTION_TIMEOUT_MS, CLOSE_EXISTING_CHECK_DELAY_MS } from './constants';
 
-export interface CloseHandlerOptions {
+export interface CloseSuccessOptions {
   showSettings: ShowSettings;
   onClosed: () => void;
 }
 
-export const detectCloseButtons = (options: CloseHandlerOptions): void => {
-  if (!isPullRequestPage() || !options.showSettings.isEnabled('closed')) {
-    return;
-  }
+export interface CloseButtonOptions {
+  showSettings: ShowSettings;
+}
 
-  const closeButtonContainer = document.querySelector('#partial-new-comment-form-actions');
-  if (!closeButtonContainer) {
-    return;
-  }
+const CLOSE_FLAG_KEYS = ['prCloseTriggered', 'prCloseTime'];
+const CLOSE_FLAG_TTL_MS = 30000;
+const CLOSED_STATE_SELECTOR = '[data-component="StateLabel"][data-status="pullClosed"]';
 
-  const closeButtons = closeButtonContainer.querySelectorAll('button');
-  closeButtons.forEach((button) => {
-    const buttonText = button.textContent?.toLowerCase().trim() || '';
-    if (
-      buttonText.includes('close pull request') &&
-      !button.hasAttribute('data-elden-ring-close-listener')
-    ) {
-      button.addEventListener('click', () => {
-        console.log('🛑 Close pull request button clicked');
-        waitForCloseCompletion(options.onClosed);
-      });
-      button.setAttribute('data-elden-ring-close-listener', 'true');
+// The banner fires only once BOTH conditions hold: the user clicked our close
+// button (intent flag), and the PR header actually shows the closed state. The
+// flag alone isn't enough — otherwise a plain refresh within the TTL re-shows
+// the banner. We consume the flag the moment we fire, so refreshing a
+// already-closed PR never re-triggers. Runs on load and on DOM changes so it
+// catches both a full reload and an in-place/Turbo close update.
+export const checkForPRCloseSuccess = (options: CloseSuccessOptions): void => {
+  if (!isPullRequestPage()) return;
+
+  chrome.storage.local.get(CLOSE_FLAG_KEYS, (result) => {
+    if (!result.prCloseTriggered || !result.prCloseTime) return;
+
+    if (Date.now() - result.prCloseTime >= CLOSE_FLAG_TTL_MS) {
+      chrome.storage.local.remove(CLOSE_FLAG_KEYS);
+      return;
+    }
+
+    // Wait until the PR is genuinely closed; re-checked on the next DOM change.
+    if (!document.querySelector(CLOSED_STATE_SELECTOR)) {
+      return;
+    }
+
+    // Consume the flag first so a subsequent refresh can never re-trigger.
+    chrome.storage.local.remove(CLOSE_FLAG_KEYS);
+
+    if (options.showSettings.isEnabled('closed')) {
+      console.log('☠️ PR close confirmed, showing banner');
+      options.onClosed();
+    } else {
+      console.log('🚫 PR close detected but disabled in settings');
     }
   });
 };
 
-export const waitForCloseCompletion = (onClosed: () => void): void => {
-  let closeHandled = false;
-  let checkTimeout: ReturnType<typeof setTimeout> | null = null;
-  let cleanupTimeout: ReturnType<typeof setTimeout> | null = null;
-
-  const cleanup = (): void => {
-    if (checkTimeout) {
-      clearTimeout(checkTimeout);
-      checkTimeout = null;
-    }
-    if (cleanupTimeout) {
-      clearTimeout(cleanupTimeout);
-      cleanupTimeout = null;
-    }
-  };
-
-  const isClosedState = (element: Element | null): boolean => {
-    if (!element) return false;
-    if (!element.matches('.State.State--closed')) {
-      return false;
-    }
-    const text = element.textContent?.toLowerCase().trim() || '';
-    return text.includes('closed');
-  };
-
-  const handleClose = (observer: MutationObserver): void => {
-    if (closeHandled) return;
-    closeHandled = true;
-    console.log('☠️ Pull request closed!');
-    cleanup();
-    onClosed();
-    observer.disconnect();
-  };
-
-  const checkExistingClosedState = (observer: MutationObserver): boolean => {
-    const closedElement = document.querySelector('.State.State--closed');
-    if (isClosedState(closedElement)) {
-      handleClose(observer);
-      return true;
-    }
-    return false;
-  };
-
-  const observer = new MutationObserver((mutations) => {
-    if (closeHandled) return;
-
-    mutations.forEach((mutation) => {
-      mutation.addedNodes.forEach((node) => {
-        if (node.nodeType !== Node.ELEMENT_NODE || closeHandled) {
-          return;
-        }
-
-        const element = node as Element;
-        if (isClosedState(element)) {
-          handleClose(observer);
-          return;
-        }
-
-        const closedElement = element.querySelector('.State.State--closed');
-        if (isClosedState(closedElement)) {
-          handleClose(observer);
-        }
-      });
-    });
-  });
-
-  observer.observe(document.body, {
-    childList: true,
-    subtree: true,
-  });
-
-  if (checkExistingClosedState(observer)) {
+export const detectCloseButtons = (options: CloseButtonOptions): void => {
+  if (!isPullRequestPage()) {
     return;
   }
 
-  checkTimeout = setTimeout(() => {
-    if (!closeHandled) {
-      checkExistingClosedState(observer);
-    }
-  }, CLOSE_EXISTING_CHECK_DELAY_MS);
-
-  cleanupTimeout = setTimeout(() => {
-    if (!closeHandled) {
-      cleanup();
-      observer.disconnect();
-      console.log('⏰ Close detection timeout');
-    }
-  }, CLOSE_DETECTION_TIMEOUT_MS);
+  // `name="comment_and_close"` is the stable form field for the close action;
+  // the visible label toggles between "Close pull request" and "Close with
+  // comment" depending on whether a comment is typed, so don't match on text.
+  const closeButton = document.querySelector('button[name="comment_and_close"]');
+  if (closeButton && !closeButton.hasAttribute('data-elden-ring-close-listener')) {
+    closeButton.addEventListener('click', () => {
+      console.log('🛑 Close pull request button clicked');
+      if (options.showSettings.isEnabled('closed')) {
+        console.log('📝 Setting PR close flag in storage');
+        chrome.storage.local.set({
+          prCloseTriggered: true,
+          prCloseTime: Date.now(),
+        });
+      } else {
+        console.log('🚫 PR close banner disabled in settings');
+      }
+    });
+    closeButton.setAttribute('data-elden-ring-close-listener', 'true');
+  }
 };

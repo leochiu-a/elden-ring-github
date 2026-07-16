@@ -1,0 +1,34 @@
+name: Changeset Check
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  changeset:
+    runs-on: ubuntu-latest
+    name: Changeset
+    # Skip the check when the PR is explicitly labelled as needing no release note.
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'skip-changeset') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for a changeset
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          ADDED=$(git diff --name-only --diff-filter=A "$BASE_SHA" HEAD -- '.changeset/*.md' \
+            | grep -v '^\.changeset/README\.md$' || true)
+
+          if [ -z "$ADDED" ]; then
+            echo "::error::No changeset found in this PR."
+            echo "Add one with 'pnpm changeset', or apply the 'skip-changeset' label if this change needs no release note (e.g. CI, docs, chore)."
+            exit 1
+          fi
+
+          echo "Found changeset(s):"
+          echo "$ADDED"

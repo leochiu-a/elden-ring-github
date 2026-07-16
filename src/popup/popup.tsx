@@ -23,7 +23,12 @@ interface EventConfig {
 const EVENTS: EventConfig[] = [
   { type: 'merged', label: 'PR Merged', flag: 'showOnPRMerged', captionKey: 'captionMerged' },
   { type: 'created', label: 'PR Created', flag: 'showOnPRCreate', captionKey: 'captionCreated' },
-  { type: 'approved', label: 'PR Approved', flag: 'showOnPRApprove', captionKey: 'captionApproved' },
+  {
+    type: 'approved',
+    label: 'PR Approved',
+    flag: 'showOnPRApprove',
+    captionKey: 'captionApproved',
+  },
   { type: 'closed', label: 'PR Closed', flag: 'showOnPRClose', captionKey: 'captionClosed' },
 ];
 
@@ -111,8 +116,9 @@ const EventsTab = ({
   update: (patch: Partial<PopupSettings>) => void;
 }) => (
   <div class="tab-panel">
-    <p class="hint">Toggle each event and customize its banner text. Leave text empty to use the
-    default.</p>
+    <p class="hint">
+      Toggle each event and customize its banner text. Leave text empty to use the default.
+    </p>
     {EVENTS.map((event) => {
       const enabled = settings[event.flag] as boolean;
       const caption = settings[event.captionKey] as string;
@@ -131,9 +137,7 @@ const EventsTab = ({
               maxLength={40}
               placeholder={DEFAULT_CAPTIONS[event.type]}
               disabled={!enabled}
-              onInput={(e) =>
-                update({ [event.captionKey]: (e.target as HTMLInputElement).value })
-              }
+              onInput={(e) => update({ [event.captionKey]: (e.target as HTMLInputElement).value })}
             />
             {caption && (
               <button
