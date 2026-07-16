@@ -121,3 +121,7 @@ dist/                   # Built extension (Chrome loads this)
 ├── popup/
 └── assets/
 ```
+
+## ⚖️ Disclaimer
+
+This extension is an unofficial fan-made project. It is not affiliated with, endorsed, or sponsored by FromSoftware or Bandai Namco Entertainment. All game audio, names, and assets are trademarks and copyright of their respective owners.
