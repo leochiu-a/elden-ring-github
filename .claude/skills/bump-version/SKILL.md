@@ -52,9 +52,20 @@ git commit -m "chore(release): sync manifest version to <NEW_VERSION>
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>"
 ```
 
-## Step 5: Report
+## Step 5: Tag the release
 
-Summarize: old → new for both files, which changeset drove the bump, and that nothing is pushed/tagged. Do **not** push, tag, or publish unless the user asks.
+Tag the manifest-sync commit (where both files reach the new version) with a `v`-prefixed tag, matching the existing convention (`v1.5.0`, `v2.0.0`):
+
+```bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+git tag v<NEW_VERSION> <manifest-sync-commit-sha>
+```
+
+Push the tag only when pushing (Step 6): `git push origin v<NEW_VERSION>`.
+
+## Step 6: Report
+
+Summarize: old → new for both files, which changeset drove the bump, and the tag created. Do **not** push or publish unless the user asks; when the user does ask to push, push both the branch and the tag.
 
 ## Manual bump (no changesets / override)
 
