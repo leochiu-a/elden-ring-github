@@ -19,5 +19,5 @@ Use [commitlint](https://commitlint.js.org/) format:
 feat: add sound toggle setting
 fix: banner not showing on merge
 docs: update readme
-style: format with prettier
+style: format with oxfmt
 ```
