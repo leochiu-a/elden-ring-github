@@ -1,50 +1,30 @@
 import { defineConfig } from 'tsdown';
-import { copyFileSync, mkdirSync, existsSync, readdirSync } from 'fs';
-import { join } from 'path';
 
-export default defineConfig({
-  entry: ['src/content/content.ts', 'src/popup/popup.ts'],
+// Content and popup are built as two separate single-entry bundles so each
+// output is fully self-contained. Content scripts are loaded as classic scripts
+// and cannot `require()` shared chunks, so code-splitting across the two entries
+// must be avoided. The build script runs this config once per target.
+const target = process.env.TSDOWN_TARGET ?? 'popup';
+
+const shared = {
   outDir: 'dist',
-  format: ['cjs'],
-  clean: true,
+  format: ['cjs'] as const,
   external: ['chrome'],
-  plugins: [
-    {
-      name: 'copy-files',
-      writeBundle() {
-        try {
-          // Copy manifest.json
-          if (existsSync('manifest.json')) {
-            copyFileSync('manifest.json', 'dist/manifest.json');
-          }
+  clean: false, // `prebuild` handles cleaning so the two runs don't wipe each other
+};
 
-          // Copy popup files
-          mkdirSync('dist/popup', { recursive: true });
-          if (existsSync('src/popup/popup.html')) {
-            copyFileSync('src/popup/popup.html', 'dist/popup/popup.html');
-          }
-          if (existsSync('src/popup/popup.css')) {
-            copyFileSync('src/popup/popup.css', 'dist/popup/popup.css');
-          }
-
-          // Copy content CSS
-          if (existsSync('src/content/styles.css')) {
-            mkdirSync('dist/content', { recursive: true });
-            copyFileSync('src/content/styles.css', 'dist/content/styles.css');
-          }
-
-          // Copy assets
-          if (existsSync('src/assets')) {
-            mkdirSync('dist/assets', { recursive: true });
-            const files = readdirSync('src/assets');
-            files.forEach((file: string) => {
-              copyFileSync(join('src/assets', file), join('dist/assets', file));
-            });
-          }
-        } catch (error) {
-          console.error('Error copying files:', error);
-        }
+export default defineConfig(
+  target === 'content'
+    ? {
+        ...shared,
+        entry: ['src/content/content.ts'],
+      }
+    : {
+        ...shared,
+        entry: ['src/popup/popup.tsx'],
+        alias: {
+          'react/jsx-runtime': 'preact/jsx-runtime',
+          'react/jsx-dev-runtime': 'preact/jsx-runtime',
+        },
       },
-    },
-  ],
-});
+);

@@ -1,4 +1,5 @@
 import { generateBannerDataUrl } from './eldenBanner';
+import { resolveCaption } from '../types/captions';
 
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
 
@@ -7,15 +8,10 @@ interface RenderBannerOptions {
   soundUrl: string;
   soundEnabled: boolean;
   soundVolume?: number;
+  /** Custom caption text; falls back to the built-in default when empty. */
+  caption?: string | undefined;
   onHide: () => void;
 }
-
-const bannerCaptionMap: Record<BannerType, string> = {
-  merged: 'PULL REQUEST MERGED',
-  created: 'PULL REQUEST CREATED',
-  approved: 'PULL REQUEST APPROVED',
-  closed: 'PULL REQUEST CLOSED',
-};
 
 /**
  * Renders the Elden Ring banner with correct imagery and optional audio with safe cleanup.
@@ -25,17 +21,18 @@ export const renderBanner = ({
   soundUrl,
   soundEnabled,
   soundVolume,
+  caption,
   onHide,
 }: RenderBannerOptions): boolean => {
   try {
     const banner = document.createElement('div');
     banner.id = 'elden-ring-banner';
 
-    const caption = bannerCaptionMap[type];
+    const resolvedCaption = resolveCaption(type, caption);
 
     const img = document.createElement('img');
-    img.src = generateBannerDataUrl(caption);
-    img.alt = caption;
+    img.src = generateBannerDataUrl(resolvedCaption);
+    img.alt = resolvedCaption;
     banner.appendChild(img);
     document.body.appendChild(banner);
 

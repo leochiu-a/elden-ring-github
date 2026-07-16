@@ -8,6 +8,7 @@ import {
 } from './features';
 import { ShowSettings, type SettingsState } from './showSettings';
 import type { SoundType } from '../types/settings';
+import { CAPTION_STORAGE_KEYS } from '../types/captions';
 
 class EldenRingOrchestrator {
   private bannerShown: boolean = false;
@@ -15,6 +16,7 @@ class EldenRingOrchestrator {
   private soundType: SoundType = 'you-die-sound';
   private soundVolume: number = 1;
   private soundUrl: string;
+  private captions: SettingsState = {} as SettingsState;
   private features: GitHubFeature[] = [];
   private showSettings = new ShowSettings();
 
@@ -37,6 +39,7 @@ class EldenRingOrchestrator {
     this.soundEnabled = state.soundEnabled;
     this.soundType = state.soundType;
     this.soundVolume = state.soundVolume;
+    this.captions = state;
     this.updateSoundUrl();
   }
 
@@ -78,6 +81,7 @@ class EldenRingOrchestrator {
       soundUrl: defaultSoundUrl,
       soundEnabled: this.soundEnabled,
       soundVolume: this.soundVolume,
+      caption: this.captions[CAPTION_STORAGE_KEYS[type]],
       onHide: () => {
         this.bannerShown = false;
       },
