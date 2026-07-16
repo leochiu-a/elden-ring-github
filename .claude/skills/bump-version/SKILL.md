@@ -63,9 +63,25 @@ git tag v<NEW_VERSION> <manifest-sync-commit-sha>
 
 Push the tag only when pushing (Step 6): `git push origin v<NEW_VERSION>`.
 
-## Step 6: Report
+## Step 6: Create the GitHub release
 
-Summarize: old → new for both files, which changeset drove the bump, and the tag created. Do **not** push or publish unless the user asks; when the user does ask to push, push both the branch and the tag.
+After the tag is pushed, create a GitHub release with `gh`. Use the changeset-authored `CHANGELOG.md` section for this version as the release notes (more meaningful than GitHub's auto-generated PR list). `gh` is at `/opt/homebrew/bin/gh` and is already authenticated.
+
+Extract the section for the new version and create the release:
+
+```bash
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+VERSION=<NEW_VERSION>
+# Pull the CHANGELOG block from "## <VERSION>" up to the next "## " heading.
+awk "/^## ${VERSION}\$/{f=1;next} /^## /{f=0} f" CHANGELOG.md > /tmp/release-notes-${VERSION}.md
+gh release create "v${VERSION}" --title "v${VERSION}" --notes-file "/tmp/release-notes-${VERSION}.md"
+```
+
+If a release for the tag already exists, skip creation (or use `gh release edit v${VERSION} --notes-file ...` to refresh the notes) rather than erroring.
+
+## Step 7: Report
+
+Summarize: old → new for both files, which changeset drove the bump, the tag created, and the release URL. Do **not** push or publish unless the user asks; when the user does ask to push, push the branch, the tag, and create the release.
 
 ## Manual bump (no changesets / override)
 
