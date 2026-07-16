@@ -33,7 +33,8 @@ const SPECK_COLOR = '225, 195, 140';
 // --- Matte gold caption ---
 const SHEEN_COLOR = 'rgb(230, 190, 120)';
 const SHEEN_OPACITY = 0.12;
-const SHEEN_SCALE_X = 1.06;
+// The sheen's horizontal spread (SHEEN_SCALE_X) is applied in CSS as an
+// animated transform, so the sheen image itself is drawn aligned (scaleX 1).
 const GLOW_COLOR = 'rgba(255, 205, 110, 0.35)';
 const GLOW_BLUR = 0.14; // fraction of font size
 const SHADOW_FILL = 'rgba(60, 40, 18, 0.55)'; // soft dark base for legibility
@@ -132,17 +133,6 @@ const drawEldenText = (
   const centerY = canvas.height / 2;
   const fontSize = applyFont(ctx, canvas);
 
-  // Faint horizontal sheen echo behind the letters.
-  ctx.save();
-  applyFont(ctx, canvas);
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = SHEEN_OPACITY;
-  ctx.fillStyle = SHEEN_COLOR;
-  ctx.translate(centerX, centerY);
-  ctx.scale(SHEEN_SCALE_X, 1);
-  ctx.fillText(caption, 0, 0);
-  ctx.restore();
-
   // Warm halo plus a soft dark base so the text stays legible over any page.
   ctx.save();
   applyFont(ctx, canvas);
@@ -160,6 +150,24 @@ const drawEldenText = (
   ctx.restore();
 };
 
+const drawSheenEcho = (
+  ctx: CanvasRenderingContext2D,
+  canvas: HTMLCanvasElement,
+  caption: string,
+): void => {
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Aligned (scaleX 1) faint echo; the outward spread is animated in CSS.
+  ctx.save();
+  applyFont(ctx, canvas);
+  ctx.globalAlpha = SHEEN_OPACITY;
+  ctx.fillStyle = SHEEN_COLOR;
+  ctx.fillText(caption, centerX, centerY);
+  ctx.restore();
+};
+
+/** Base layer: the smoky band and the opaque gold caption (no sheen echo). */
 export const generateBannerDataUrl = (caption: string): string => {
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_WIDTH;
@@ -172,6 +180,26 @@ export const generateBannerDataUrl = (caption: string): string => {
 
   drawShadowBar(ctx, canvas);
   drawEldenText(ctx, canvas, caption);
+
+  return canvas.toDataURL('image/png');
+};
+
+/**
+ * Sheen layer: only the faint echo of the caption on a transparent canvas,
+ * drawn aligned with the base text. Rendered as its own element so the outward
+ * horizontal spread can be animated (see .banner-sheen in styles.css).
+ */
+export const generateSheenDataUrl = (caption: string): string => {
+  const canvas = document.createElement('canvas');
+  canvas.width = CANVAS_WIDTH;
+  canvas.height = CANVAS_HEIGHT;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return '';
+  }
+
+  drawSheenEcho(ctx, canvas, caption);
 
   return canvas.toDataURL('image/png');
 };

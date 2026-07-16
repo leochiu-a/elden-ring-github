@@ -1,4 +1,4 @@
-import { generateBannerDataUrl } from './eldenBanner';
+import { generateBannerDataUrl, generateSheenDataUrl } from './eldenBanner';
 import { resolveCaption } from '../types/captions';
 
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
@@ -30,10 +30,21 @@ export const renderBanner = ({
 
     const resolvedCaption = resolveCaption(type, caption);
 
-    const img = document.createElement('img');
-    img.src = generateBannerDataUrl(resolvedCaption);
-    img.alt = resolvedCaption;
-    banner.appendChild(img);
+    // Base layer: smoky band + opaque caption.
+    const base = document.createElement('img');
+    base.className = 'banner-base';
+    base.src = generateBannerDataUrl(resolvedCaption);
+    base.alt = resolvedCaption;
+    banner.appendChild(base);
+
+    // Sheen layer: faint echo that animates outward after the fade-in.
+    const sheen = document.createElement('img');
+    sheen.className = 'banner-sheen';
+    sheen.src = generateSheenDataUrl(resolvedCaption);
+    sheen.alt = '';
+    sheen.setAttribute('aria-hidden', 'true');
+    banner.appendChild(sheen);
+
     document.body.appendChild(banner);
 
     if (soundEnabled) {

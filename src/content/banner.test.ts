@@ -79,8 +79,10 @@ describe('renderBanner', () => {
 
       const banner = document.getElementById('elden-ring-banner');
       expect(banner).toBeTruthy();
-      const img = banner?.querySelector('img');
-      expect(img?.src).toBe('data:image/png;base64,mock');
+      const base = banner?.querySelector('img.banner-base') as HTMLImageElement | null;
+      const sheen = banner?.querySelector('img.banner-sheen') as HTMLImageElement | null;
+      expect(base?.src).toBe('data:image/png;base64,mock');
+      expect(sheen?.src).toBe('data:image/png;base64,mock');
 
       vi.runAllTimers();
       expect(onHide).toHaveBeenCalled();
