@@ -24,10 +24,10 @@ export const CAPTION_STORAGE_KEYS: Record<BannerType, keyof CaptionSettings> = {
 };
 
 export interface CaptionSettings {
-  captionMerged?: string;
-  captionCreated?: string;
-  captionApproved?: string;
-  captionClosed?: string;
+  captionMerged?: string | undefined;
+  captionCreated?: string | undefined;
+  captionApproved?: string | undefined;
+  captionClosed?: string | undefined;
 }
 
 /**

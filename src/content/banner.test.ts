@@ -50,7 +50,7 @@ describe('renderBanner', () => {
     );
 
     audioInstances = [];
-    global.Audio = vi.fn().mockImplementation(() => {
+    global.Audio = vi.fn().mockImplementation(function () {
       const instance = {
         play: vi.fn().mockResolvedValue(undefined),
         volume: 0,

@@ -32,11 +32,15 @@ global.chrome = {
   },
 } as any;
 
-// Mock Audio API
-global.Audio = vi.fn().mockImplementation(() => ({
-  play: vi.fn().mockResolvedValue(undefined),
-  volume: 0.35,
-}));
+// Mock Audio API. Use a function expression (not an arrow) so the mock is
+// constructable — banner code calls `new Audio(...)`, and Vitest 4 invokes the
+// implementation as a constructor, which arrow functions cannot be.
+global.Audio = vi.fn().mockImplementation(function () {
+  return {
+    play: vi.fn().mockResolvedValue(undefined),
+    volume: 0.35,
+  };
+});
 
 // Mock MutationObserver
 global.MutationObserver = vi.fn().mockImplementation((_callback) => ({

@@ -10,7 +10,10 @@ export interface CloseButtonOptions {
   showSettings: ShowSettings;
 }
 
-const CLOSE_FLAG_KEYS = ['prCloseTriggered', 'prCloseTime'];
+const CLOSE_FLAG_KEYS: Array<'prCloseTriggered' | 'prCloseTime'> = [
+  'prCloseTriggered',
+  'prCloseTime',
+];
 const CLOSE_FLAG_TTL_MS = 30000;
 const CLOSED_STATE_SELECTOR = '[data-component="StateLabel"][data-status="pullClosed"]';
 
@@ -23,29 +26,32 @@ const CLOSED_STATE_SELECTOR = '[data-component="StateLabel"][data-status="pullCl
 export const checkForPRCloseSuccess = (options: CloseSuccessOptions): void => {
   if (!isPullRequestPage()) return;
 
-  chrome.storage.local.get(CLOSE_FLAG_KEYS, (result) => {
-    if (!result.prCloseTriggered || !result.prCloseTime) return;
+  chrome.storage.local.get<{ prCloseTriggered?: boolean; prCloseTime?: number }>(
+    CLOSE_FLAG_KEYS,
+    (result) => {
+      if (!result.prCloseTriggered || !result.prCloseTime) return;
 
-    if (Date.now() - result.prCloseTime >= CLOSE_FLAG_TTL_MS) {
+      if (Date.now() - result.prCloseTime >= CLOSE_FLAG_TTL_MS) {
+        chrome.storage.local.remove(CLOSE_FLAG_KEYS);
+        return;
+      }
+
+      // Wait until the PR is genuinely closed; re-checked on the next DOM change.
+      if (!document.querySelector(CLOSED_STATE_SELECTOR)) {
+        return;
+      }
+
+      // Consume the flag first so a subsequent refresh can never re-trigger.
       chrome.storage.local.remove(CLOSE_FLAG_KEYS);
-      return;
-    }
 
-    // Wait until the PR is genuinely closed; re-checked on the next DOM change.
-    if (!document.querySelector(CLOSED_STATE_SELECTOR)) {
-      return;
-    }
-
-    // Consume the flag first so a subsequent refresh can never re-trigger.
-    chrome.storage.local.remove(CLOSE_FLAG_KEYS);
-
-    if (options.showSettings.isEnabled('closed')) {
-      console.log('☠️ PR close confirmed, showing banner');
-      options.onClosed();
-    } else {
-      console.log('🚫 PR close detected but disabled in settings');
-    }
-  });
+      if (options.showSettings.isEnabled('closed')) {
+        console.log('☠️ PR close confirmed, showing banner');
+        options.onClosed();
+      } else {
+        console.log('🚫 PR close detected but disabled in settings');
+      }
+    },
+  );
 };
 
 export const detectCloseButtons = (options: CloseButtonOptions): void => {

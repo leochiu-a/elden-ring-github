@@ -50,7 +50,7 @@ export class ShowSettings {
   }
 
   private initStorageSync(): void {
-    chrome.storage.sync.get(
+    chrome.storage.sync.get<Partial<SettingsState>>(
       [
         'soundEnabled',
         'soundType',
@@ -86,51 +86,29 @@ export class ShowSettings {
       let updated = false;
       const nextState = { ...this.state };
 
-      if (changes.soundEnabled) {
-        nextState.soundEnabled = changes.soundEnabled.newValue;
+      // Storage values arrive as `unknown` (@types/chrome 0.2+); assign each
+      // through a typed helper, coercing where a runtime check is warranted.
+      const apply = <K extends keyof SettingsState>(
+        key: K,
+        coerce?: (value: unknown) => SettingsState[K],
+      ): void => {
+        const change = changes[key];
+        if (!change) return;
+        nextState[key] = coerce ? coerce(change.newValue) : (change.newValue as SettingsState[K]);
         updated = true;
-      }
-      if (changes.soundType) {
-        nextState.soundType = changes.soundType.newValue;
-        updated = true;
-      }
-      if (changes.soundVolume) {
-        nextState.soundVolume =
-          typeof changes.soundVolume.newValue === 'number' ? changes.soundVolume.newValue : 1;
-        updated = true;
-      }
-      if (changes.showOnPRMerged) {
-        nextState.showOnPRMerged = changes.showOnPRMerged.newValue;
-        updated = true;
-      }
-      if (changes.showOnPRCreate) {
-        nextState.showOnPRCreate = changes.showOnPRCreate.newValue;
-        updated = true;
-      }
-      if (changes.showOnPRApprove) {
-        nextState.showOnPRApprove = changes.showOnPRApprove.newValue;
-        updated = true;
-      }
-      if (changes.showOnPRClose) {
-        nextState.showOnPRClose = changes.showOnPRClose.newValue;
-        updated = true;
-      }
-      if (changes.captionMerged) {
-        nextState.captionMerged = changes.captionMerged.newValue;
-        updated = true;
-      }
-      if (changes.captionCreated) {
-        nextState.captionCreated = changes.captionCreated.newValue;
-        updated = true;
-      }
-      if (changes.captionApproved) {
-        nextState.captionApproved = changes.captionApproved.newValue;
-        updated = true;
-      }
-      if (changes.captionClosed) {
-        nextState.captionClosed = changes.captionClosed.newValue;
-        updated = true;
-      }
+      };
+
+      apply('soundEnabled');
+      apply('soundType');
+      apply('soundVolume', (value) => (typeof value === 'number' ? value : 1));
+      apply('showOnPRMerged');
+      apply('showOnPRCreate');
+      apply('showOnPRApprove');
+      apply('showOnPRClose');
+      apply('captionMerged');
+      apply('captionCreated');
+      apply('captionApproved');
+      apply('captionClosed');
 
       if (updated) {
         this.state = nextState;

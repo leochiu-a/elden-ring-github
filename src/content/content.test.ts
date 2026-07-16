@@ -157,7 +157,9 @@ describe('EldenRingOrchestrator', () => {
       volume: 0.35,
     };
 
-    global.Audio = vi.fn().mockImplementation(() => mockAudio);
+    global.Audio = vi.fn().mockImplementation(function () {
+      return mockAudio;
+    });
     global.chrome.runtime.getURL = vi.fn(() => 'chrome-extension://mock/sound.mp3');
 
     const soundType = 'you-die-sound';

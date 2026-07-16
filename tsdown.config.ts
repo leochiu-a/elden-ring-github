@@ -50,7 +50,7 @@ const copyStaticPlugin = {
 // `chrome` stays a free global reference in both.
 const shared = {
   outDir: 'dist',
-  external: ['chrome'],
+  deps: { neverBundle: ['chrome'] },
   format: 'esm' as const,
   clean: false, // `prebuild` handles cleaning so the two runs don't wipe each other
   plugins: [copyStaticPlugin],

@@ -60,7 +60,7 @@ export const useSettings = () => {
   const [settings, setSettings] = useState<PopupSettings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
-    chrome.storage.sync.get(STORAGE_KEYS, (result) => {
+    chrome.storage.sync.get<Partial<PopupSettings>>(STORAGE_KEYS, (result) => {
       setSettings({
         showOnPRMerged: result.showOnPRMerged !== false,
         showOnPRCreate: result.showOnPRCreate !== false,
