@@ -30,7 +30,7 @@
     "merge",
     "banner"
   ],
-  "author": "Your Name",
+  "author": "leochiu",
   "license": "MIT",
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
