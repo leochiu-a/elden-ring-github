@@ -20,8 +20,8 @@ const LETTER_SPACING = 0.08; // fraction of font size — the wide in-game track
 
 // --- Smoky dark band ---
 const BAR_HEIGHT_RATIO = 0.34; // broad, soft vertical falloff
-const BAR_CORE_COLOR = '8, 8, 10';
-const BAR_CORE_OPACITY = 0.55;
+const BAR_CORE_COLOR = '0, 0, 0'; // pure black, like the in-game shadow bar
+const BAR_CORE_OPACITY = 0.78;
 const BAR_BLUR = 10; // px at 1080p, scaled up
 const GRAIN_TILE_W = 520;
 const GRAIN_TILE_H = 140;
@@ -38,9 +38,9 @@ const GLOW_COLOR = 'rgba(255, 205, 110, 0.35)';
 const GLOW_BLUR = 0.14; // fraction of font size
 const SHADOW_FILL = 'rgba(60, 40, 18, 0.55)'; // soft dark base for legibility
 
-// Flat, matte amber gold — the in-game caption is a near-uniform colour with
-// no metallic gradient or specular band.
-const GOLD_COLOR = '#dfb466';
+// Flat, matte amber gold — the near-uniform in-game caption colour (the
+// image-creator's Elden "Victory" preset textColor), deeper than a pastel gold.
+const GOLD_COLOR = 'rgb(220, 175, 45)';
 
 const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
   const fontSize = FONT_SIZE * (canvas.height / 1080);
