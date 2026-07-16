@@ -51,9 +51,9 @@ const triggerTestBanner = (): void => {
     chrome.tabs.sendMessage(tabId, TEST_BANNER_MESSAGE, () => {
       if (!chrome.runtime.lastError) return;
 
-      // No receiver yet: inject the content script, then retry.
+      // No receiver yet: inject the content-script loader, then retry.
       chrome.scripting.insertCSS({ target: { tabId }, files: ['content/styles.css'] });
-      chrome.scripting.executeScript({ target: { tabId }, files: ['content.js'] }, () => {
+      chrome.scripting.executeScript({ target: { tabId }, files: ['content-loader.js'] }, () => {
         if (chrome.runtime.lastError) return;
         chrome.tabs.sendMessage(tabId, TEST_BANNER_MESSAGE, () => void chrome.runtime.lastError);
       });

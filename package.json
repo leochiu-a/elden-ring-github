@@ -7,7 +7,7 @@
     "build": "TSDOWN_TARGET=content tsdown && TSDOWN_TARGET=popup tsdown && npm run copy-static",
     "dev": "concurrently -k -n content,popup \"TSDOWN_TARGET=content tsdown --watch\" \"TSDOWN_TARGET=popup tsdown --watch\"",
     "clean": "rm -rf dist",
-    "copy-static": "cp manifest.json dist/ && cp -r src/popup/*.html src/popup/*.css dist/popup/ && mkdir -p dist/content && cp src/content/styles.css dist/content/ && cp -r src/assets dist/",
+    "copy-static": "cp manifest.json dist/ && cp -r src/popup/*.html src/popup/*.css dist/popup/ && mkdir -p dist/content && cp src/content/styles.css dist/content/ && cp src/content/content-loader.js dist/ && cp -r src/assets dist/",
     "lint": "oxlint src/",
     "lint:fix": "oxlint src/ --fix",
     "format": "prettier --write src/**/*",

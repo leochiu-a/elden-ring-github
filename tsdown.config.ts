@@ -28,6 +28,9 @@ const copyStaticPlugin = {
         mkdirSync('dist/content', { recursive: true });
         copyFileSync('src/content/styles.css', 'dist/content/styles.css');
       }
+      if (existsSync('src/content/content-loader.js')) {
+        copyFileSync('src/content/content-loader.js', 'dist/content-loader.js');
+      }
       if (existsSync('src/assets')) {
         mkdirSync('dist/assets', { recursive: true });
         for (const file of readdirSync('src/assets')) {
@@ -42,7 +45,6 @@ const copyStaticPlugin = {
 
 const shared = {
   outDir: 'dist',
-  format: ['cjs'] as const,
   external: ['chrome'],
   clean: false, // `prebuild` handles cleaning so the two runs don't wipe each other
   plugins: [copyStaticPlugin],
@@ -53,10 +55,16 @@ export default defineConfig(
     ? {
         ...shared,
         entry: ['src/content/content.ts'],
+        // ES module: its declarations live in module scope (never the shared
+        // isolated-world scope) and it is evaluated once per URL. The manifest
+        // injects content-loader.js, which dynamically imports this bundle, so
+        // re-injection can't redeclare identifiers. `chrome` stays a free global.
+        format: ['esm'] as const,
       }
     : {
         ...shared,
         entry: ['src/popup/popup.tsx'],
+        format: ['cjs'] as const,
         alias: {
           'react/jsx-runtime': 'preact/jsx-runtime',
           'react/jsx-dev-runtime': 'preact/jsx-runtime',
