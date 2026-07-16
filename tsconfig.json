@@ -23,9 +23,6 @@
     "noImplicitOverride": true,
     "noUncheckedIndexedAccess": true,
 
-    /* JSX (Preact) */
-    "jsxImportSource": "preact",
-
     /* Chrome Extension Types */
     "types": ["chrome"],
 
@@ -36,6 +33,15 @@
       "@/assets/*": ["src/assets/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"],
-  "exclude": ["node_modules", "dist", "elden_mail_banner"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "elden_mail_banner"
+  ]
 }

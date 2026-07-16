@@ -1,7 +1,6 @@
 import type { SoundType } from '../types/sounds';
-import type { CaptionSettings } from '../types/captions';
 
-export interface SettingsState extends CaptionSettings {
+export interface SettingsState {
   soundEnabled: boolean;
   soundType: SoundType;
   soundVolume: number;
@@ -59,10 +58,6 @@ export class ShowSettings {
         'showOnPRCreate',
         'showOnPRApprove',
         'showOnPRClose',
-        'captionMerged',
-        'captionCreated',
-        'captionApproved',
-        'captionClosed',
       ],
       (result) => {
         this.state = {
@@ -73,10 +68,6 @@ export class ShowSettings {
           showOnPRCreate: result.showOnPRCreate !== false,
           showOnPRApprove: result.showOnPRApprove !== false,
           showOnPRClose: result.showOnPRClose !== false,
-          captionMerged: result.captionMerged,
-          captionCreated: result.captionCreated,
-          captionApproved: result.captionApproved,
-          captionClosed: result.captionClosed,
         };
         this.notify();
       },
@@ -113,22 +104,6 @@ export class ShowSettings {
       }
       if (changes.showOnPRClose) {
         nextState.showOnPRClose = changes.showOnPRClose.newValue;
-        updated = true;
-      }
-      if (changes.captionMerged) {
-        nextState.captionMerged = changes.captionMerged.newValue;
-        updated = true;
-      }
-      if (changes.captionCreated) {
-        nextState.captionCreated = changes.captionCreated.newValue;
-        updated = true;
-      }
-      if (changes.captionApproved) {
-        nextState.captionApproved = changes.captionApproved.newValue;
-        updated = true;
-      }
-      if (changes.captionClosed) {
-        nextState.captionClosed = changes.captionClosed.newValue;
         updated = true;
       }
 

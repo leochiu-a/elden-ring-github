@@ -1,7 +1,6 @@
 import type { SoundType } from './sounds';
-import type { CaptionSettings } from './captions';
 
-export interface EldenRingSettings extends CaptionSettings {
+export interface EldenRingSettings {
   showOnPRMerged?: boolean;
   soundEnabled?: boolean;
   duration?: number;
@@ -13,4 +12,3 @@ export interface EldenRingSettings extends CaptionSettings {
 }
 
 export type { SoundType };
-export type { CaptionSettings };

@@ -6,8 +6,8 @@
 }
 
 body {
-  width: 340px;
-  min-height: 420px;
+  width: 320px;
+  min-height: 400px;
   font-family: 'Cinzel', 'Times New Roman', serif;
   background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #0f0f0f 100%);
   color: #d4af37;
@@ -20,135 +20,10 @@ body {
 
 .header {
   text-align: center;
-  margin-bottom: 16px;
-  padding: 12px 0;
+  margin-bottom: 20px;
+  padding: 16px 0;
   border-bottom: 2px solid #d4af37;
   position: relative;
-}
-
-/* Tabs */
-.tab-bar {
-  display: flex;
-  gap: 4px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-.tab {
-  flex: 1;
-  padding: 8px 4px;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  color: #b8860b;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.tab:hover {
-  color: #d4af37;
-}
-
-.tab-active {
-  color: #d4af37;
-  border-bottom-color: #d4af37;
-  text-shadow: 0 0 8px rgba(212, 175, 55, 0.5);
-}
-
-.tab-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.hint {
-  font-size: 11px;
-  color: #8a6d1f;
-  line-height: 1.4;
-  font-style: italic;
-}
-
-/* Event cards */
-.event-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 10px;
-  background: rgba(212, 175, 55, 0.04);
-  border: 1px solid rgba(212, 175, 55, 0.2);
-  border-radius: 6px;
-}
-
-.caption-row {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.text-input {
-  flex: 1;
-  min-width: 0;
-  background: #1a1a1a;
-  border: 1px solid #d4af37;
-  color: #d4af37;
-  padding: 6px 8px;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-}
-
-.text-input::placeholder {
-  color: rgba(184, 134, 11, 0.5);
-}
-
-.text-input:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.text-input:focus {
-  outline: none;
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.4);
-}
-
-.reset-btn {
-  flex-shrink: 0;
-  background: transparent;
-  border: 1px solid rgba(212, 175, 55, 0.4);
-  color: #b8860b;
-  padding: 6px 8px;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.reset-btn:hover {
-  border-color: #d4af37;
-  color: #d4af37;
-}
-
-.select {
-  width: 100%;
-  background: #1a1a1a;
-  border: 1px solid #d4af37;
-  color: #d4af37;
-  padding: 6px 8px;
-  border-radius: 4px;
-  font-family: inherit;
-  font-size: 11px;
-  margin-top: 6px;
-}
-
-.select:disabled {
-  opacity: 0.4;
 }
 
 .header::before {
