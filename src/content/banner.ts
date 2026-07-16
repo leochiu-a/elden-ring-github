@@ -1,3 +1,6 @@
+import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
+import { resolveCaption } from '../types/captions';
+
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
 
 interface RenderBannerOptions {
@@ -5,27 +8,10 @@ interface RenderBannerOptions {
   soundUrl: string;
   soundEnabled: boolean;
   soundVolume?: number;
+  /** Custom caption text; falls back to the built-in default when empty. */
+  caption?: string | undefined;
   onHide: () => void;
 }
-
-const bannerAssetMap: Record<BannerType, { image: string; alt: string }> = {
-  merged: {
-    image: 'pull-request-merged.png',
-    alt: 'Pull Request Merged',
-  },
-  created: {
-    image: 'pull-request-created.png',
-    alt: 'Pull Request Created',
-  },
-  approved: {
-    image: 'approve-pull-request.png',
-    alt: 'Pull Request Approved',
-  },
-  closed: {
-    image: 'close-pull-request.png',
-    alt: 'Pull Request Closed',
-  },
-};
 
 /**
  * Renders the Elden Ring banner with correct imagery and optional audio with safe cleanup.
@@ -35,19 +21,40 @@ export const renderBanner = ({
   soundUrl,
   soundEnabled,
   soundVolume,
+  caption,
   onHide,
 }: RenderBannerOptions): boolean => {
   try {
     const banner = document.createElement('div');
     banner.id = 'elden-ring-banner';
 
-    const asset = bannerAssetMap[type];
-    const imgPath = chrome.runtime.getURL(`assets/${asset.image}`);
+    const resolvedCaption = resolveCaption(type, caption);
 
-    const img = document.createElement('img');
-    img.src = imgPath;
-    img.alt = asset.alt;
-    banner.appendChild(img);
+    // Bottom layer: the smoky band. Defines the banner's size.
+    const band = document.createElement('img');
+    band.className = 'banner-band';
+    band.src = generateBandDataUrl();
+    band.alt = '';
+    band.setAttribute('aria-hidden', 'true');
+    banner.appendChild(band);
+
+    // Middle layer: the faint echo that spreads outward after the fade-in.
+    // Stacked below the caption so its centre stays masked by the opaque
+    // letters and only the spreading fringe shows.
+    const sheen = document.createElement('img');
+    sheen.className = 'banner-sheen';
+    sheen.src = generateSheenDataUrl(resolvedCaption);
+    sheen.alt = '';
+    sheen.setAttribute('aria-hidden', 'true');
+    banner.appendChild(sheen);
+
+    // Top layer: the opaque gold caption.
+    const caption_ = document.createElement('img');
+    caption_.className = 'banner-caption';
+    caption_.src = generateCaptionDataUrl(resolvedCaption);
+    caption_.alt = resolvedCaption;
+    banner.appendChild(caption_);
+
     document.body.appendChild(banner);
 
     if (soundEnabled) {

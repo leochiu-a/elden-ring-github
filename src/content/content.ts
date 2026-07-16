@@ -8,6 +8,7 @@ import {
 } from './features';
 import { ShowSettings, type SettingsState } from './showSettings';
 import type { SoundType } from '../types/settings';
+import { CAPTION_STORAGE_KEYS } from '../types/captions';
 
 class EldenRingOrchestrator {
   private bannerShown: boolean = false;
@@ -15,6 +16,7 @@ class EldenRingOrchestrator {
   private soundType: SoundType = 'you-die-sound';
   private soundVolume: number = 1;
   private soundUrl: string;
+  private captions: SettingsState = {} as SettingsState;
   private features: GitHubFeature[] = [];
   private showSettings = new ShowSettings();
 
@@ -37,6 +39,7 @@ class EldenRingOrchestrator {
     this.soundEnabled = state.soundEnabled;
     this.soundType = state.soundType;
     this.soundVolume = state.soundVolume;
+    this.captions = state;
     this.updateSoundUrl();
   }
 
@@ -78,6 +81,7 @@ class EldenRingOrchestrator {
       soundUrl: defaultSoundUrl,
       soundEnabled: this.soundEnabled,
       soundVolume: this.soundVolume,
+      caption: this.captions[CAPTION_STORAGE_KEYS[type]],
       onHide: () => {
         this.bannerShown = false;
       },
@@ -110,5 +114,19 @@ class EldenRingOrchestrator {
   }
 }
 
-// Initialize the extension
-new EldenRingOrchestrator();
+// Initialize the extension. Guarded so that if the popup re-injects this file
+// via chrome.scripting.executeScript (e.g. into a tab whose content script
+// predates the latest build), we don't spawn a second orchestrator/observer.
+if (!window.__eldenRingLoaded) {
+  window.__eldenRingLoaded = true;
+
+  const orchestrator = new EldenRingOrchestrator();
+
+  // Lets the popup's "Test Merge" button reuse the exact same banner rendering
+  // path as real PR events, instead of duplicating it.
+  chrome.runtime.onMessage.addListener((message: { type?: string }) => {
+    if (message?.type === 'ELDEN_RING_TEST_BANNER') {
+      orchestrator.showEldenRingBanner('approved');
+    }
+  });
+}

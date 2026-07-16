@@ -9,12 +9,45 @@ describe('renderBanner', () => {
     document.body.innerHTML = '';
     vi.useFakeTimers();
 
-    const chromeGlobal = globalThis as unknown as {
-      chrome?: { runtime?: { getURL?: (path: string) => string } };
+    const fakeCtx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      scale: vi.fn(),
+      translate: vi.fn(),
+      fillRect: vi.fn(),
+      fillText: vi.fn(),
+      strokeText: vi.fn(),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createImageData: vi.fn((w: number, h: number) => ({
+        data: new Uint8ClampedArray(w * h * 4),
+      })),
+      putImageData: vi.fn(),
+      drawImage: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      arc: vi.fn(),
+      clip: vi.fn(),
+      fill: vi.fn(),
+      set filter(_value: string) {},
+      set fillStyle(_value: unknown) {},
+      set strokeStyle(_value: unknown) {},
+      set lineWidth(_value: number) {},
+      set shadowColor(_value: string) {},
+      set shadowBlur(_value: number) {},
+      set font(_value: string) {},
+      set textAlign(_value: string) {},
+      set textBaseline(_value: string) {},
+      set letterSpacing(_value: string) {},
+      set globalCompositeOperation(_value: string) {},
+      set globalAlpha(_value: number) {},
     };
-    chromeGlobal.chrome = chromeGlobal.chrome || {};
-    chromeGlobal.chrome.runtime = chromeGlobal.chrome.runtime || {};
-    chromeGlobal.chrome.runtime.getURL = vi.fn((path: string) => `chrome-extension://mock/${path}`);
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      fakeCtx as unknown as CanvasRenderingContext2D,
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(
+      'data:image/png;base64,mock',
+    );
 
     audioInstances = [];
     global.Audio = vi.fn().mockImplementation(() => {
@@ -29,6 +62,7 @@ describe('renderBanner', () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
   });
 
   it('should render banners for each type', () => {
@@ -45,9 +79,16 @@ describe('renderBanner', () => {
 
       const banner = document.getElementById('elden-ring-banner');
       expect(banner).toBeTruthy();
-      expect(banner?.innerHTML).toContain('.png');
-      const chromeRuntime = (globalThis as any).chrome.runtime;
-      expect(chromeRuntime.getURL).toHaveBeenCalled();
+      const band = banner?.querySelector('img.banner-band') as HTMLImageElement | null;
+      const sheen = banner?.querySelector('img.banner-sheen') as HTMLImageElement | null;
+      const caption = banner?.querySelector('img.banner-caption') as HTMLImageElement | null;
+      expect(band?.src).toBe('data:image/png;base64,mock');
+      expect(sheen?.src).toBe('data:image/png;base64,mock');
+      expect(caption?.src).toBe('data:image/png;base64,mock');
+      // Caption must come after the sheen so the opaque letters mask its centre.
+      expect(
+        sheen!.compareDocumentPosition(caption!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
 
       vi.runAllTimers();
       expect(onHide).toHaveBeenCalled();

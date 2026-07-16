@@ -5,6 +5,9 @@ import { vi } from 'vitest';
 global.chrome = {
   runtime: {
     getURL: vi.fn((path: string) => `chrome-extension://mock-id/${path}`),
+    onMessage: {
+      addListener: vi.fn(),
+    },
   },
   storage: {
     sync: {
@@ -22,6 +25,7 @@ global.chrome = {
   },
   tabs: {
     query: vi.fn(),
+    sendMessage: vi.fn(),
   },
   scripting: {
     executeScript: vi.fn(),

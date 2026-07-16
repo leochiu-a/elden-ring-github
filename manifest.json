@@ -25,13 +25,13 @@
   "content_scripts": [
     {
       "matches": ["https://github.com/*"],
-      "js": ["content.js"],
+      "js": ["content-loader.js"],
       "css": ["content/styles.css"]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["assets/*"],
+      "resources": ["assets/*", "content.mjs"],
       "matches": ["https://github.com/*"]
     }
   ]
