@@ -61,13 +61,8 @@ const drawEldenText = (
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
 
-  ctx.save();
-  applyFontSliders(ctx, canvas);
-  ctx.fillStyle = TEXT_COLOR;
-  ctx.fillText(caption, centerX, centerY);
-  ctx.restore();
-
-  // Additive horizontal "sheen" pass, mirroring drawEldenNounVerbed's glow.
+  // Layer 1 (behind): additive horizontal "sheen" ghost, mirroring
+  // drawEldenNounVerbed's glow. Drawn first so it sits behind the caption.
   ctx.save();
   applyFontSliders(ctx, canvas);
   ctx.globalCompositeOperation = 'lighter';
@@ -76,6 +71,13 @@ const drawEldenText = (
   ctx.translate(centerX, centerY);
   ctx.scale(SHEEN_SIZE, 1 + (SHEEN_SIZE - 1) / 2);
   ctx.fillText(caption, 0, 0);
+  ctx.restore();
+
+  // Layer 2 (front): the caption itself, fully opaque over the sheen.
+  ctx.save();
+  applyFontSliders(ctx, canvas);
+  ctx.fillStyle = TEXT_COLOR;
+  ctx.fillText(caption, centerX, centerY);
   ctx.restore();
 };
 
