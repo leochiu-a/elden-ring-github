@@ -13,19 +13,22 @@ export interface CreationButtonOptions {
 export const checkForPRCreationSuccess = (options: CreationSuccessOptions): void => {
   if (!isPullRequestPage()) return;
 
-  chrome.storage.local.get(['prCreationTriggered', 'prCreationTime'], (result) => {
-    if (result.prCreationTriggered && result.prCreationTime) {
-      const timeDiff = Date.now() - result.prCreationTime;
-      if (timeDiff < 30000 && options.showSettings.isEnabled('created')) {
-        console.log('✅ PR creation detected via storage flag, showing banner');
-        options.onCreated();
-        chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
-      } else if (timeDiff < 30000 && !options.showSettings.isEnabled('created')) {
-        console.log('🚫 PR creation detected but disabled in settings');
-        chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
+  chrome.storage.local.get<{ prCreationTriggered?: boolean; prCreationTime?: number }>(
+    ['prCreationTriggered', 'prCreationTime'],
+    (result) => {
+      if (result.prCreationTriggered && result.prCreationTime) {
+        const timeDiff = Date.now() - result.prCreationTime;
+        if (timeDiff < 30000 && options.showSettings.isEnabled('created')) {
+          console.log('✅ PR creation detected via storage flag, showing banner');
+          options.onCreated();
+          chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
+        } else if (timeDiff < 30000 && !options.showSettings.isEnabled('created')) {
+          console.log('🚫 PR creation detected but disabled in settings');
+          chrome.storage.local.remove(['prCreationTriggered', 'prCreationTime']);
+        }
       }
-    }
-  });
+    },
+  );
 };
 
 export const detectPRCreationButtons = (options: CreationButtonOptions): void => {

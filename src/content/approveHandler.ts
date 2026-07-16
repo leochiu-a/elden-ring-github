@@ -13,19 +13,22 @@ export interface ApprovalButtonOptions {
 export const checkForPRApprovalSuccess = (options: ApprovalSuccessOptions): void => {
   if (!isPullRequestPage()) return;
 
-  chrome.storage.local.get(['prApprovalTriggered', 'prApprovalTime'], (result) => {
-    if (result.prApprovalTriggered && result.prApprovalTime) {
-      const timeDiff = Date.now() - result.prApprovalTime;
-      if (timeDiff < 30000 && options.showSettings.isEnabled('approved')) {
-        console.log('✅ PR approval detected via storage flag, showing banner');
-        options.onApproved();
-        chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
-      } else if (timeDiff < 30000 && !options.showSettings.isEnabled('approved')) {
-        console.log('🚫 PR approval detected but disabled in settings');
-        chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+  chrome.storage.local.get<{ prApprovalTriggered?: boolean; prApprovalTime?: number }>(
+    ['prApprovalTriggered', 'prApprovalTime'],
+    (result) => {
+      if (result.prApprovalTriggered && result.prApprovalTime) {
+        const timeDiff = Date.now() - result.prApprovalTime;
+        if (timeDiff < 30000 && options.showSettings.isEnabled('approved')) {
+          console.log('✅ PR approval detected via storage flag, showing banner');
+          options.onApproved();
+          chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+        } else if (timeDiff < 30000 && !options.showSettings.isEnabled('approved')) {
+          console.log('🚫 PR approval detected but disabled in settings');
+          chrome.storage.local.remove(['prApprovalTriggered', 'prApprovalTime']);
+        }
       }
-    }
-  });
+    },
+  );
 };
 
 export const detectPRApprovalButtons = (options: ApprovalButtonOptions): void => {

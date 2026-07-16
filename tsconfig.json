@@ -27,14 +27,7 @@
     "jsxImportSource": "preact",
 
     /* Chrome Extension Types */
-    "types": ["chrome"],
-
-    /* Path mapping */
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"],
-      "@/assets/*": ["src/assets/*"]
-    }
+    "types": ["chrome", "node"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js", "src/**/*.jsx"],
   "exclude": ["node_modules", "dist", "elden_mail_banner"]
