@@ -6,6 +6,7 @@
   transform: translate(-50%, -50%);
   opacity: 0;
   z-index: 999999;
+  /* fade-out duration */
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
   width: 100vw;
@@ -16,6 +17,8 @@
 
 #elden-ring-banner.show {
   opacity: 1;
+  /* faster fade-in */
+  transition: opacity 0.2s ease-out;
 }
 
 #elden-ring-banner img {
@@ -34,6 +37,7 @@
   transform: translate(-50%, -50%);
   opacity: 0;
   z-index: 999999;
+  /* fade-out duration */
   transition: opacity 0.5s ease-in-out;
   pointer-events: none;
   width: 100vw;
@@ -44,6 +48,8 @@
 
 .elden-ring-merge-banner.show {
   opacity: 1;
+  /* faster fade-in */
+  transition: opacity 0.2s ease-out;
 }
 
 .elden-ring-banner-content {
