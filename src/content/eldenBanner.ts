@@ -11,7 +11,7 @@ const CANVAS_HEIGHT = 2160;
 
 const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
 const TEXT_COLOR = 'rgb(220, 175, 45)';
-const SHEEN_COLOR = 'rgb(255, 208, 66)';
+const GLOW_COLOR = 'rgba(255, 208, 66, 0.45)';
 
 const SHADOW_SIZE = 0.85;
 const SHADOW_OPACITY = 1;
@@ -21,8 +21,9 @@ const SHADOW_SOFTNESS = 1.1;
 const FONT_SIZE = 88;
 const FONT_WEIGHT = 300;
 
-const SHEEN_OPACITY = 0.18;
-const SHEEN_SIZE = 1.11;
+// Soft gold halo drawn directly under the opaque text (no horizontal offset),
+// so the caption keeps its Elden Ring glow without a see-through duplicate.
+const GLOW_BLUR = 0.16;
 
 const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void => {
   const scale = canvas.height / 1080;
@@ -61,21 +62,18 @@ const drawEldenText = (
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
 
+  const scale = canvas.height / 1080;
+
   ctx.save();
   applyFontSliders(ctx, canvas);
+  // Aligned gold halo behind the letters — glow without an offset ghost.
+  ctx.shadowColor = GLOW_COLOR;
+  ctx.shadowBlur = FONT_SIZE * GLOW_BLUR * scale;
   ctx.fillStyle = TEXT_COLOR;
   ctx.fillText(caption, centerX, centerY);
-  ctx.restore();
-
-  // Additive horizontal "sheen" pass, mirroring drawEldenNounVerbed's glow.
-  ctx.save();
-  applyFontSliders(ctx, canvas);
-  ctx.globalCompositeOperation = 'lighter';
-  ctx.globalAlpha = SHEEN_OPACITY;
-  ctx.fillStyle = SHEEN_COLOR;
-  ctx.translate(centerX, centerY);
-  ctx.scale(SHEEN_SIZE, 1 + (SHEEN_SIZE - 1) / 2);
-  ctx.fillText(caption, 0, 0);
+  // Second opaque pass keeps the letter faces fully solid over the halo.
+  ctx.shadowBlur = 0;
+  ctx.fillText(caption, centerX, centerY);
   ctx.restore();
 };
 
