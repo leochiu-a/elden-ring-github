@@ -109,7 +109,8 @@ const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement)
   }
   ctx.restore();
 
-  // Fade every layer smoothly at all four edges by multiplying two alpha masks.
+  // Fade the band only at the top and bottom; it spans the full width and runs
+  // edge to edge horizontally, like the in-game vignette.
   ctx.save();
   ctx.globalCompositeOperation = 'destination-in';
   const vMask = ctx.createLinearGradient(0, top, 0, top + barHeight);
@@ -118,13 +119,6 @@ const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement)
   vMask.addColorStop(0.65, 'rgba(0, 0, 0, 1)');
   vMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
   ctx.fillStyle = vMask;
-  ctx.fillRect(0, top, canvas.width, barHeight);
-  const hMask = ctx.createLinearGradient(0, 0, canvas.width, 0);
-  hMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
-  hMask.addColorStop(0.14, 'rgba(0, 0, 0, 1)');
-  hMask.addColorStop(0.86, 'rgba(0, 0, 0, 1)');
-  hMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
-  ctx.fillStyle = hMask;
   ctx.fillRect(0, top, canvas.width, barHeight);
   ctx.restore();
 };
