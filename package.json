@@ -5,7 +5,7 @@
   "main": "dist/content.js",
   "scripts": {
     "build": "TSDOWN_TARGET=content tsdown && TSDOWN_TARGET=popup tsdown && npm run copy-static",
-    "dev": "TSDOWN_TARGET=popup tsdown --watch",
+    "dev": "concurrently -k -n content,popup \"TSDOWN_TARGET=content tsdown --watch\" \"TSDOWN_TARGET=popup tsdown --watch\"",
     "clean": "rm -rf dist",
     "copy-static": "cp manifest.json dist/ && cp -r src/popup/*.html src/popup/*.css dist/popup/ && mkdir -p dist/content && cp src/content/styles.css dist/content/ && cp -r src/assets dist/",
     "lint": "oxlint src/",
@@ -38,6 +38,7 @@
     "@types/chrome": "^0.0.268",
     "@types/node": "^22.5.0",
     "@vitest/ui": "^3.2.4",
+    "concurrently": "^10.0.3",
     "happy-dom": "^18.0.1",
     "husky": "^9.1.7",
     "jsdom": "^27.0.0",
