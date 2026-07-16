@@ -1,0 +1,20 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "semi": true,
+  "singleQuote": true,
+  "printWidth": 100,
+  "tabWidth": 2,
+  "useTabs": false,
+  "sortPackageJson": false,
+  "ignorePatterns": [
+    "dist/",
+    "node_modules/",
+    "elden_mail_banner/",
+    "*.min.js",
+    "*.min.css",
+    "package-lock.json",
+    ".git/",
+    "*.mp3",
+    "*.png"
+  ]
+}
