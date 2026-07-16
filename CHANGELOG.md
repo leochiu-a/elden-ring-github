@@ -1,5 +1,34 @@
 # elden-ring-github
 
+## 2.0.0
+
+### Major Changes
+
+- 34909b2: Render the banner sheen echo behind the opaque caption. The banner is now
+  composed of three stacked layers — smoky band, sheen echo, and opaque gold
+  caption — so the caption masks the echo's aligned core and only the offset
+  echo emerges from behind the letters. Previously the sheen was drawn on top of
+  the caption, showing through as a misregistered "ghost" duplicate that grew
+  with caption length and screen width.
+
+### Minor Changes
+
+- 7448d0b: Redesign the popup with a "Gilded Obsidian" theme — an Erdtree-gold radial
+  glow, embossed panels, a two-font hierarchy (display serif for titles/tabs,
+  readable serif for body), and higher-contrast, larger text for legibility.
+  Simplify the header to "Elden Ring / GitHub", add a "View on GitHub" link in
+  the About tab, and set the package author.
+
+### Patch Changes
+
+- aa28ed5: Fix the PR close banner never triggering. Closing a pull request posts the
+  Rails comment form (`name="comment_and_close"`), which the old
+  `.State.State--closed` MutationObserver could never observe — the same
+  GitHub Primer redesign that previously broke merge detection. Detection now
+  records the close intent in storage on click and celebrates only once the PR
+  header actually shows the closed `StateLabel`, consuming the flag on fire so a
+  plain refresh of an already-closed PR never re-triggers the banner.
+
 ## 1.4.0
 
 ### Minor Changes
@@ -21,6 +50,7 @@
 ### Minor Changes
 
 - 51d697b: test: add comprehensive unit tests for PR approval functionality
+
   - Add vitest test cases for approval radio button detection in review dialogs
   - Test PR approval flag storage and retrieval mechanisms
   - Add test coverage for approval settings loading and changes
