@@ -1,14 +1,16 @@
 import type { BannerType } from '../content/banner';
 
 /**
- * Default banner captions per event. Used as the fallback whenever a user
- * leaves the custom caption field empty.
+ * Default banner captions per event, in the spirit of Elden Ring's on-screen
+ * messages. Used as the fallback whenever a user leaves the custom caption
+ * field empty. ("VICTORY ACHIEVED" and "A SHARD SHATTERED" carry over from the
+ * original banner artwork in src/assets.)
  */
 export const DEFAULT_CAPTIONS: Record<BannerType, string> = {
-  merged: 'PULL REQUEST MERGED',
-  created: 'PULL REQUEST CREATED',
-  approved: 'PULL REQUEST APPROVED',
-  closed: 'PULL REQUEST CLOSED',
+  merged: 'ENEMY FELLED',
+  created: 'LOST GRACE DISCOVERED',
+  approved: 'VICTORY ACHIEVED',
+  closed: 'A SHARD SHATTERED',
 };
 
 /**
