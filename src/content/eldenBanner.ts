@@ -1,6 +1,10 @@
 /**
  * Canvas-based renderer for the Elden Ring "Noun Verbed" (Victory) banner style,
- * ported from https://sibert-aerts.github.io/new-area/image-creator/ (js/drawFunctions.js).
+ * inspired by https://sibert-aerts.github.io/new-area/image-creator/.
+ *
+ * Matches the in-game look: an elegant, wide-tracked serif in flat, matte amber
+ * gold with a faint horizontal sheen echo, floating over a broad, soft, smoky
+ * dark band — so it reads like an ancient sigil rising over the page beneath.
  */
 
 // Rendered at 2x (3840x2160) so the banner stays sharp when CSS upscales it to
@@ -10,47 +14,119 @@ const CANVAS_WIDTH = 3840;
 const CANVAS_HEIGHT = 2160;
 
 const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
-const TEXT_COLOR = 'rgb(220, 175, 45)';
-const SHEEN_COLOR = 'rgb(255, 208, 66)';
+const FONT_SIZE = 80;
+const FONT_WEIGHT = 400;
+const LETTER_SPACING = 0.08; // fraction of font size — the wide in-game tracking
 
-const SHADOW_SIZE = 0.85;
-const SHADOW_OPACITY = 1;
-const SHADOW_OFFSET = -0.006;
-const SHADOW_SOFTNESS = 1.1;
+// --- Smoky dark band ---
+const BAR_HEIGHT_RATIO = 0.34; // broad, soft vertical falloff
+const BAR_CORE_COLOR = '8, 8, 10';
+const BAR_CORE_OPACITY = 0.55;
+const BAR_BLUR = 10; // px at 1080p, scaled up
+const GRAIN_TILE_W = 520;
+const GRAIN_TILE_H = 140;
+const GRAIN_MAX_ALPHA = 22; // 0-255 per-pixel noise alpha (subtle dust)
+const GRAIN_OPACITY = 0.3;
+const SPECK_COUNT = 45;
+const SPECK_COLOR = '225, 195, 140';
 
-const FONT_SIZE = 88;
-const FONT_WEIGHT = 300;
+// --- Matte gold caption ---
+const SHEEN_COLOR = 'rgb(230, 190, 120)';
+const SHEEN_OPACITY = 0.12;
+const SHEEN_SCALE_X = 1.06;
+const GLOW_COLOR = 'rgba(255, 205, 110, 0.35)';
+const GLOW_BLUR = 0.14; // fraction of font size
+const SHADOW_FILL = 'rgba(60, 40, 18, 0.55)'; // soft dark base for legibility
 
-const SHEEN_OPACITY = 0.18;
-const SHEEN_SIZE = 1.11;
+// Flat, matte amber gold — the in-game caption is a near-uniform colour with
+// no metallic gradient or specular band.
+const GOLD_COLOR = '#dfb466';
 
-const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void => {
-  const scale = canvas.height / 1080;
-  const barHeight = canvas.height * SHADOW_SIZE * 0.18;
-  const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
-
-  ctx.save();
-  ctx.filter = `blur(${SHADOW_SOFTNESS * 12 * scale}px)`;
-
-  const gradient = ctx.createLinearGradient(0, centerY - barHeight / 2, 0, centerY + barHeight / 2);
-  gradient.addColorStop(0, `rgba(20, 20, 20, 0)`);
-  gradient.addColorStop(0.5, `rgba(20, 20, 20, ${SHADOW_OPACITY})`);
-  gradient.addColorStop(1, `rgba(20, 20, 20, 0)`);
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, centerY - barHeight / 2, canvas.width, barHeight);
-  ctx.restore();
-};
-
-const applyFontSliders = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
-  const scale = canvas.height / 1080;
-  const fontSize = FONT_SIZE * scale;
-
+const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
+  const fontSize = FONT_SIZE * (canvas.height / 1080);
   ctx.font = `${FONT_WEIGHT} ${fontSize}px ${FONT_FAMILY}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-
+  ctx.letterSpacing = `${fontSize * LETTER_SPACING}px`;
   return fontSize;
+};
+
+const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void => {
+  const scale = canvas.height / 1080;
+  const barHeight = canvas.height * BAR_HEIGHT_RATIO;
+  const centerY = canvas.height / 2;
+  const top = centerY - barHeight / 2;
+
+  // Smoky core: a broad, soft, blurred vertical band.
+  ctx.save();
+  ctx.filter = `blur(${BAR_BLUR * scale}px)`;
+  const core = ctx.createLinearGradient(0, top, 0, top + barHeight);
+  core.addColorStop(0, `rgba(${BAR_CORE_COLOR}, 0)`);
+  core.addColorStop(0.5, `rgba(${BAR_CORE_COLOR}, ${BAR_CORE_OPACITY})`);
+  core.addColorStop(1, `rgba(${BAR_CORE_COLOR}, 0)`);
+  ctx.fillStyle = core;
+  ctx.fillRect(0, top, canvas.width, barHeight);
+  ctx.restore();
+
+  // Faint film grain / dust, tiled from a small noise buffer and stretched.
+  const noise = document.createElement('canvas');
+  noise.width = GRAIN_TILE_W;
+  noise.height = GRAIN_TILE_H;
+  const noiseCtx = noise.getContext('2d');
+  if (noiseCtx) {
+    const image = noiseCtx.createImageData(GRAIN_TILE_W, GRAIN_TILE_H);
+    for (let i = 0; i < image.data.length; i += 4) {
+      const v = Math.floor(Math.random() * 255);
+      image.data[i] = v;
+      image.data[i + 1] = v;
+      image.data[i + 2] = v;
+      image.data[i + 3] = Math.floor(Math.random() * GRAIN_MAX_ALPHA);
+    }
+    noiseCtx.putImageData(image, 0, 0);
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'overlay';
+    ctx.globalAlpha = GRAIN_OPACITY;
+    ctx.drawImage(noise, 0, top, canvas.width, barHeight);
+    ctx.restore();
+  }
+
+  // Sparse, faint light specks / dust motes.
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < SPECK_COUNT; i++) {
+    const x = canvas.width * (0.1 + Math.random() * 0.8);
+    const y = centerY + (Math.random() - 0.5) * barHeight * 0.6;
+    const r = (0.5 + Math.random() * 1.8) * scale * 4;
+    const a = 0.02 + Math.random() * 0.08;
+    const speck = ctx.createRadialGradient(x, y, 0, x, y, r);
+    speck.addColorStop(0, `rgba(${SPECK_COLOR}, ${a})`);
+    speck.addColorStop(1, `rgba(${SPECK_COLOR}, 0)`);
+    ctx.fillStyle = speck;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+
+  // Fade every layer smoothly at all four edges by multiplying two alpha masks.
+  ctx.save();
+  ctx.globalCompositeOperation = 'destination-in';
+  const vMask = ctx.createLinearGradient(0, top, 0, top + barHeight);
+  vMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  vMask.addColorStop(0.35, 'rgba(0, 0, 0, 1)');
+  vMask.addColorStop(0.65, 'rgba(0, 0, 0, 1)');
+  vMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = vMask;
+  ctx.fillRect(0, top, canvas.width, barHeight);
+  const hMask = ctx.createLinearGradient(0, 0, canvas.width, 0);
+  hMask.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  hMask.addColorStop(0.14, 'rgba(0, 0, 0, 1)');
+  hMask.addColorStop(0.86, 'rgba(0, 0, 0, 1)');
+  hMask.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = hMask;
+  ctx.fillRect(0, top, canvas.width, barHeight);
+  ctx.restore();
 };
 
 const drawEldenText = (
@@ -59,24 +135,33 @@ const drawEldenText = (
   caption: string,
 ): void => {
   const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2 + SHADOW_OFFSET * canvas.height;
+  const centerY = canvas.height / 2;
+  const fontSize = applyFont(ctx, canvas);
 
-  // Layer 1 (behind): additive horizontal "sheen" ghost, mirroring
-  // drawEldenNounVerbed's glow. Drawn first so it sits behind the caption.
+  // Faint horizontal sheen echo behind the letters.
   ctx.save();
-  applyFontSliders(ctx, canvas);
+  applyFont(ctx, canvas);
   ctx.globalCompositeOperation = 'lighter';
   ctx.globalAlpha = SHEEN_OPACITY;
   ctx.fillStyle = SHEEN_COLOR;
   ctx.translate(centerX, centerY);
-  ctx.scale(SHEEN_SIZE, 1 + (SHEEN_SIZE - 1) / 2);
+  ctx.scale(SHEEN_SCALE_X, 1);
   ctx.fillText(caption, 0, 0);
   ctx.restore();
 
-  // Layer 2 (front): the caption itself, fully opaque over the sheen.
+  // Warm halo plus a soft dark base so the text stays legible over any page.
   ctx.save();
-  applyFontSliders(ctx, canvas);
-  ctx.fillStyle = TEXT_COLOR;
+  applyFont(ctx, canvas);
+  ctx.shadowColor = GLOW_COLOR;
+  ctx.shadowBlur = fontSize * GLOW_BLUR;
+  ctx.fillStyle = SHADOW_FILL;
+  ctx.fillText(caption, centerX, centerY + fontSize * 0.012);
+  ctx.restore();
+
+  // Flat, matte gold face.
+  ctx.save();
+  applyFont(ctx, canvas);
+  ctx.fillStyle = GOLD_COLOR;
   ctx.fillText(caption, centerX, centerY);
   ctx.restore();
 };
