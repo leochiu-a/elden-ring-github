@@ -79,10 +79,16 @@ describe('renderBanner', () => {
 
       const banner = document.getElementById('elden-ring-banner');
       expect(banner).toBeTruthy();
-      const base = banner?.querySelector('img.banner-base') as HTMLImageElement | null;
+      const band = banner?.querySelector('img.banner-band') as HTMLImageElement | null;
       const sheen = banner?.querySelector('img.banner-sheen') as HTMLImageElement | null;
-      expect(base?.src).toBe('data:image/png;base64,mock');
+      const caption = banner?.querySelector('img.banner-caption') as HTMLImageElement | null;
+      expect(band?.src).toBe('data:image/png;base64,mock');
       expect(sheen?.src).toBe('data:image/png;base64,mock');
+      expect(caption?.src).toBe('data:image/png;base64,mock');
+      // Caption must come after the sheen so the opaque letters mask its centre.
+      expect(
+        sheen!.compareDocumentPosition(caption!) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
 
       vi.runAllTimers();
       expect(onHide).toHaveBeenCalled();

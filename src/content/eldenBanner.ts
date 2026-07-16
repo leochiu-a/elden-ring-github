@@ -167,8 +167,9 @@ const drawSheenEcho = (
   ctx.restore();
 };
 
-/** Base layer: the smoky band and the opaque gold caption (no sheen echo). */
-export const generateBannerDataUrl = (caption: string): string => {
+const withCanvas = (
+  draw: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void,
+): string => {
   const canvas = document.createElement('canvas');
   canvas.width = CANVAS_WIDTH;
   canvas.height = CANVAS_HEIGHT;
@@ -178,28 +179,24 @@ export const generateBannerDataUrl = (caption: string): string => {
     return '';
   }
 
-  drawShadowBar(ctx, canvas);
-  drawEldenText(ctx, canvas, caption);
+  draw(ctx, canvas);
 
   return canvas.toDataURL('image/png');
 };
+
+/** Bottom layer: the smoky dark band only, on a transparent canvas. */
+export const generateBandDataUrl = (): string => withCanvas(drawShadowBar);
 
 /**
- * Sheen layer: only the faint echo of the caption on a transparent canvas,
- * drawn aligned with the base text. Rendered as its own element so the outward
- * horizontal spread can be animated (see .banner-sheen in styles.css).
+ * Middle layer: only the faint echo of the caption on a transparent canvas,
+ * drawn aligned with the caption. Rendered as its own element, stacked *below*
+ * the opaque caption, so the caption masks its centre and only the outward
+ * horizontal spread emerges from behind the letters (see .banner-sheen in
+ * styles.css).
  */
-export const generateSheenDataUrl = (caption: string): string => {
-  const canvas = document.createElement('canvas');
-  canvas.width = CANVAS_WIDTH;
-  canvas.height = CANVAS_HEIGHT;
+export const generateSheenDataUrl = (caption: string): string =>
+  withCanvas((ctx, canvas) => drawSheenEcho(ctx, canvas, caption));
 
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    return '';
-  }
-
-  drawSheenEcho(ctx, canvas, caption);
-
-  return canvas.toDataURL('image/png');
-};
+/** Top layer: the opaque gold caption (with its glow/shadow), transparent bg. */
+export const generateCaptionDataUrl = (caption: string): string =>
+  withCanvas((ctx, canvas) => drawEldenText(ctx, canvas, caption));

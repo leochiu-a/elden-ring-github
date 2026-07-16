@@ -1,4 +1,4 @@
-import { generateBannerDataUrl, generateSheenDataUrl } from './eldenBanner';
+import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
 import { resolveCaption } from '../types/captions';
 
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
@@ -30,20 +30,30 @@ export const renderBanner = ({
 
     const resolvedCaption = resolveCaption(type, caption);
 
-    // Base layer: smoky band + opaque caption.
-    const base = document.createElement('img');
-    base.className = 'banner-base';
-    base.src = generateBannerDataUrl(resolvedCaption);
-    base.alt = resolvedCaption;
-    banner.appendChild(base);
+    // Bottom layer: the smoky band. Defines the banner's size.
+    const band = document.createElement('img');
+    band.className = 'banner-band';
+    band.src = generateBandDataUrl();
+    band.alt = '';
+    band.setAttribute('aria-hidden', 'true');
+    banner.appendChild(band);
 
-    // Sheen layer: faint echo that animates outward after the fade-in.
+    // Middle layer: the faint echo that spreads outward after the fade-in.
+    // Stacked below the caption so its centre stays masked by the opaque
+    // letters and only the spreading fringe shows.
     const sheen = document.createElement('img');
     sheen.className = 'banner-sheen';
     sheen.src = generateSheenDataUrl(resolvedCaption);
     sheen.alt = '';
     sheen.setAttribute('aria-hidden', 'true');
     banner.appendChild(sheen);
+
+    // Top layer: the opaque gold caption.
+    const caption_ = document.createElement('img');
+    caption_.className = 'banner-caption';
+    caption_.src = generateCaptionDataUrl(resolvedCaption);
+    caption_.alt = resolvedCaption;
+    banner.appendChild(caption_);
 
     document.body.appendChild(banner);
 

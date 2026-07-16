@@ -18,8 +18,9 @@
   transition: opacity 0.2s ease-out;
 }
 
-/* Base layer: smoky band + opaque caption. Defines the banner's size. */
-.banner-base {
+/* Bottom layer: smoky band. In normal flow, so it defines the banner's size;
+   the sheen and caption overlay it. */
+.banner-band {
   width: 100vw;
   max-width: 100vw;
   height: auto;
@@ -27,9 +28,9 @@
   display: block;
 }
 
-/* Sheen layer: faint echo overlaid on the base. Starts aligned with the base
-   text (scaleX 1), then spreads outward after the fade-in. */
-.banner-sheen {
+/* Sheen and caption overlay the band at the same size. */
+.banner-sheen,
+.banner-caption {
   position: absolute;
   top: 0;
   left: 0;
@@ -37,6 +38,14 @@
   max-width: 100vw;
   height: auto;
   display: block;
+}
+
+/* Sheen layer: the caption echo, stacked *below* the caption (earlier in the
+   DOM) so the opaque letters mask its aligned core and only the offset echo
+   emerges from behind them. It blends additively over the dark band, starts
+   aligned (scaleX 1), then spreads outward after the fade-in — a visible second
+   layer of text peeking out to either side. */
+.banner-sheen {
   mix-blend-mode: screen;
   transform-origin: center;
   transform: scaleX(1);

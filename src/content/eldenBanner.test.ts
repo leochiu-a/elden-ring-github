@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { generateBannerDataUrl, generateSheenDataUrl } from './eldenBanner';
+import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
 
-describe('generateBannerDataUrl', () => {
+describe('generateCaptionDataUrl', () => {
   let fillTextCalls: unknown[][];
 
   beforeEach(() => {
@@ -55,7 +55,7 @@ describe('generateBannerDataUrl', () => {
   });
 
   it('draws the caption text and returns a PNG data URL', () => {
-    const result = generateBannerDataUrl('PULL REQUEST MERGED');
+    const result = generateCaptionDataUrl('PULL REQUEST MERGED');
 
     expect(result).toBe('data:image/png;base64,mock');
     expect(fillTextCalls.some((args) => args[0] === 'PULL REQUEST MERGED')).toBe(true);
@@ -66,7 +66,52 @@ describe('generateBannerDataUrl', () => {
   it('returns an empty string when a 2d context is unavailable', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
 
-    expect(generateBannerDataUrl('PULL REQUEST CREATED')).toBe('');
+    expect(generateCaptionDataUrl('PULL REQUEST CREATED')).toBe('');
+  });
+});
+
+describe('generateBandDataUrl', () => {
+  beforeEach(() => {
+    const fakeCtx = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      fillRect: vi.fn(),
+      fillText: vi.fn(),
+      createLinearGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createRadialGradient: vi.fn(() => ({ addColorStop: vi.fn() })),
+      createImageData: vi.fn((w: number, h: number) => ({
+        data: new Uint8ClampedArray(w * h * 4),
+      })),
+      putImageData: vi.fn(),
+      drawImage: vi.fn(),
+      beginPath: vi.fn(),
+      arc: vi.fn(),
+      fill: vi.fn(),
+      set filter(_value: string) {},
+      set fillStyle(_value: unknown) {},
+      set globalCompositeOperation(_value: string) {},
+      set globalAlpha(_value: number) {},
+    };
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
+      fakeCtx as unknown as CanvasRenderingContext2D,
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(
+      'data:image/png;base64,mock',
+    );
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns a PNG data URL for the band (no caption text)', () => {
+    expect(generateBandDataUrl()).toBe('data:image/png;base64,mock');
+  });
+
+  it('returns an empty string when a 2d context is unavailable', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+
+    expect(generateBandDataUrl()).toBe('');
   });
 });
 
