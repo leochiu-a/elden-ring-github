@@ -1,7 +1,7 @@
 import { detectMergeButtons } from './mergeHandler';
 import { checkForPRCreationSuccess, detectPRCreationButtons } from './createHandler';
 import { checkForPRApprovalSuccess, detectPRApprovalButtons } from './approveHandler';
-import { detectCloseButtons } from './closeHandler';
+import { checkForPRCloseSuccess, detectCloseButtons } from './closeHandler';
 import { ShowSettings } from './showSettings';
 
 export interface GitHubFeature {
@@ -92,16 +92,22 @@ export class CloseFeature implements GitHubFeature {
   constructor(private options: CloseFeatureOptions) {}
 
   initialize(): void {
-    detectCloseButtons({
+    checkForPRCloseSuccess({
       showSettings: this.options.showSettings,
       onClosed: this.options.onCloseCelebration,
+    });
+    detectCloseButtons({
+      showSettings: this.options.showSettings,
     });
   }
 
   onDomChange(): void {
-    detectCloseButtons({
+    checkForPRCloseSuccess({
       showSettings: this.options.showSettings,
       onClosed: this.options.onCloseCelebration,
+    });
+    detectCloseButtons({
+      showSettings: this.options.showSettings,
     });
   }
 }
