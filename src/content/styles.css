@@ -40,20 +40,22 @@
   display: block;
 }
 
-/* Sheen layer: the caption echo, stacked *below* the caption (earlier in the
-   DOM) so the opaque letters mask its aligned core and only the offset echo
-   emerges from behind them. It blends additively over the dark band, starts
-   aligned (scaleX 1), then spreads outward after the fade-in — a visible second
-   layer of text peeking out to either side. */
+/* Sheen layer: the image-creator's additive ghost, stacked *above* the caption
+   (later in the DOM). Blended additively (plus-lighter) so where it aligns over
+   the gold face it adds to it — the bright overlap tone — and where it spreads
+   it becomes the dim offset echo. Starts aligned (scaleX 1), then spreads
+   outward after the fade-in. Falls back to screen where plus-lighter is
+   unsupported. */
 .banner-sheen {
   mix-blend-mode: screen;
+  mix-blend-mode: plus-lighter;
   transform-origin: center;
   transform: scaleX(1);
   transition: transform 0.6s ease-out 0.2s;
 }
 
 #elden-ring-banner.show .banner-sheen {
-  transform: scaleX(1.06);
+  transform: scaleX(1.11);
 }
 
 /* Fallback text banner for when no image is available */

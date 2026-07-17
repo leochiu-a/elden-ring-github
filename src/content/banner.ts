@@ -38,22 +38,22 @@ export const renderBanner = ({
     band.setAttribute('aria-hidden', 'true');
     banner.appendChild(band);
 
-    // Middle layer: the faint echo that spreads outward after the fade-in.
-    // Stacked below the caption so its centre stays masked by the opaque
-    // letters and only the spreading fringe shows.
+    // Middle layer: the deep matte gold caption face.
+    const caption_ = document.createElement('img');
+    caption_.className = 'banner-caption';
+    caption_.src = generateCaptionDataUrl(resolvedCaption);
+    caption_.alt = resolvedCaption;
+    banner.appendChild(caption_);
+
+    // Top layer: the warm additive sheen, blended over the face. Where it aligns
+    // it brightens the gold (the layered overlap tone); as it spreads outward
+    // after the fade-in it becomes the dim offset echo.
     const sheen = document.createElement('img');
     sheen.className = 'banner-sheen';
     sheen.src = generateSheenDataUrl(resolvedCaption);
     sheen.alt = '';
     sheen.setAttribute('aria-hidden', 'true');
     banner.appendChild(sheen);
-
-    // Top layer: the opaque gold caption.
-    const caption_ = document.createElement('img');
-    caption_.className = 'banner-caption';
-    caption_.src = generateCaptionDataUrl(resolvedCaption);
-    caption_.alt = resolvedCaption;
-    banner.appendChild(caption_);
 
     document.body.appendChild(banner);
 

@@ -85,9 +85,10 @@ describe('renderBanner', () => {
       expect(band?.src).toBe('data:image/png;base64,mock');
       expect(sheen?.src).toBe('data:image/png;base64,mock');
       expect(caption?.src).toBe('data:image/png;base64,mock');
-      // Caption must come after the sheen so the opaque letters mask its centre.
+      // Sheen must come after the caption so its additive ghost blends on top
+      // of the gold face (bright overlap tone) and spreads into the echo.
       expect(
-        sheen!.compareDocumentPosition(caption!) & Node.DOCUMENT_POSITION_FOLLOWING,
+        caption!.compareDocumentPosition(sheen!) & Node.DOCUMENT_POSITION_FOLLOWING,
       ).toBeTruthy();
 
       vi.runAllTimers();
