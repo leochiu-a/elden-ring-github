@@ -59,8 +59,9 @@ describe('generateCaptionDataUrl', () => {
 
     expect(result).toBe('data:image/png;base64,mock');
     expect(fillTextCalls.some((args) => args[0] === 'PULL REQUEST MERGED')).toBe(true);
-    // glow/shadow and gold face passes render the caption (sheen is separate now)
-    expect(fillTextCalls.length).toBeGreaterThanOrEqual(2);
+    // The front caption is a single translucent gold pass; the back gold layer
+    // and its animation live in the separate sheen image.
+    expect(fillTextCalls.length).toBeGreaterThanOrEqual(1);
   });
 
   it('returns an empty string when a 2d context is unavailable', () => {

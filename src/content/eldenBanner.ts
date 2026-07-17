@@ -31,17 +31,19 @@ const SPECK_COUNT = 45;
 const SPECK_COLOR = '225, 195, 140';
 
 // --- Matte gold caption ---
-const SHEEN_COLOR = 'rgb(230, 190, 120)';
-const SHEEN_OPACITY = 0.12;
-// The sheen's horizontal spread (SHEEN_SCALE_X) is applied in CSS as an
-// animated transform, so the sheen image itself is drawn aligned (scaleX 1).
-const GLOW_COLOR = 'rgba(255, 205, 110, 0.35)';
-const GLOW_BLUR = 0.14; // fraction of font size
-const SHADOW_FILL = 'rgba(60, 40, 18, 0.55)'; // soft dark base for legibility
-
-// Flat, matte amber gold — the near-uniform in-game caption colour (the
-// image-creator's Elden "Victory" preset textColor), deeper than a pastel gold.
+// The caption face is the image-creator's deep matte "Victory" gold, drawn as a
+// single clean opaque pass — matching the reference banner PNGs exactly (no
+// bloom, no dark base; those made it either too bright or muddy).
 const GOLD_COLOR = 'rgb(220, 175, 45)';
+
+// The .banner-sheen layer is the image-creator's additive ghost (blurTint
+// [255,208,66] @ blurOpacity 0.18), stacked on top of the face and blended
+// additively (mix-blend-mode:plus-lighter in CSS). Where it aligns over the
+// face it adds to the deep gold -> the bright overlap tone (~255,213,57); where
+// it spreads past the letters it becomes the dim offset echo. Its outward
+// spread (SHEEN_SCALE_X in CSS) is animated after the fade-in.
+const SHEEN_COLOR = 'rgb(255, 208, 66)';
+const SHEEN_OPACITY = 0.18;
 
 const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
   const fontSize = FONT_SIZE * (canvas.height / 1080);
@@ -131,18 +133,9 @@ const drawEldenText = (
 ): void => {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
-  const fontSize = applyFont(ctx, canvas);
-
-  // Warm halo plus a soft dark base so the text stays legible over any page.
-  ctx.save();
   applyFont(ctx, canvas);
-  ctx.shadowColor = GLOW_COLOR;
-  ctx.shadowBlur = fontSize * GLOW_BLUR;
-  ctx.fillStyle = SHADOW_FILL;
-  ctx.fillText(caption, centerX, centerY + fontSize * 0.012);
-  ctx.restore();
 
-  // Flat, matte gold face.
+  // Opaque deep matte gold face — a single clean pass, matching the reference.
   ctx.save();
   applyFont(ctx, canvas);
   ctx.fillStyle = GOLD_COLOR;
@@ -158,7 +151,9 @@ const drawSheenEcho = (
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
 
-  // Aligned (scaleX 1) faint echo; the outward spread is animated in CSS.
+  // Dim warm echo, drawn aligned (scaleX 1); the outward spread is animated in
+  // CSS. Stacked below the opaque caption, so its core is masked and only the
+  // faint spreading fringe shows as the see-through echo.
   ctx.save();
   applyFont(ctx, canvas);
   ctx.globalAlpha = SHEEN_OPACITY;
