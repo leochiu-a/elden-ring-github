@@ -1,5 +1,27 @@
 # elden-ring-github
 
+## 2.0.1
+
+### Patch Changes
+
+- 3f555cd: Restore the layered-gold look of the reference banner artwork. The caption is a
+  deep matte gold face with the image-creator's warm ghost (blurTint [255,208,66]
+  @ 0.18) stacked on top and blended additively via `mix-blend-mode: plus-lighter`
+  (falling back to `screen`). Where the ghost aligns over the face it adds to it —
+  the bright overlap tone (~255,213,57) — and where it spreads past the letters it
+  becomes the dim offset echo, so overlapping text shows a real blended colour
+  instead of flat gold. The ghost is a separate layer so its outward-spread
+  (scaleX -> 1.11) can animate after the fade-in.
+- 1053958: Restyle the "closed PR" banner to the Elden Ring death-screen look. Its caption
+  now renders in deep blood-red (`rgb(130, 16, 29)`) with a restrained red echo
+  instead of the shared victory gold, matching `src/assets/close-pull-request.png`.
+
+  Introduces a per-event theme registry (`bannerThemes.ts`): each `BannerType`
+  maps to a `BannerTheme` (face color, sheen color, sheen opacity), so restyling
+  an event or adding a new look is a one-line change there — the canvas renderer
+  (`eldenBanner.ts`) and DOM assembly (`banner.ts`) take colors as arguments and
+  stay untouched. The smoky dark band remains shared across all events.
+
 ## 2.0.0
 
 ### Major Changes
