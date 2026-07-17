@@ -1,4 +1,5 @@
 import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
+import { resolveBannerTheme } from './bannerThemes';
 import { resolveCaption } from '../types/captions';
 
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
@@ -29,6 +30,7 @@ export const renderBanner = ({
     banner.id = 'elden-ring-banner';
 
     const resolvedCaption = resolveCaption(type, caption);
+    const theme = resolveBannerTheme(type);
 
     // Bottom layer: the smoky band. Defines the banner's size.
     const band = document.createElement('img');
@@ -38,19 +40,19 @@ export const renderBanner = ({
     band.setAttribute('aria-hidden', 'true');
     banner.appendChild(band);
 
-    // Middle layer: the deep matte gold caption face.
+    // Middle layer: the opaque matte caption face, in the theme's face color.
     const caption_ = document.createElement('img');
     caption_.className = 'banner-caption';
-    caption_.src = generateCaptionDataUrl(resolvedCaption);
+    caption_.src = generateCaptionDataUrl(resolvedCaption, theme.faceColor);
     caption_.alt = resolvedCaption;
     banner.appendChild(caption_);
 
-    // Top layer: the warm additive sheen, blended over the face. Where it aligns
-    // it brightens the gold (the layered overlap tone); as it spreads outward
-    // after the fade-in it becomes the dim offset echo.
+    // Top layer: the additive sheen, blended over the face. Where it aligns it
+    // brightens the face (the layered overlap tone); as it spreads outward after
+    // the fade-in it becomes the dim offset echo.
     const sheen = document.createElement('img');
     sheen.className = 'banner-sheen';
-    sheen.src = generateSheenDataUrl(resolvedCaption);
+    sheen.src = generateSheenDataUrl(resolvedCaption, theme.sheenColor, theme.sheenOpacity);
     sheen.alt = '';
     sheen.setAttribute('aria-hidden', 'true');
     banner.appendChild(sheen);

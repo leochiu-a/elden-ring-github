@@ -30,11 +30,12 @@ const GRAIN_OPACITY = 0.3;
 const SPECK_COUNT = 45;
 const SPECK_COLOR = '225, 195, 140';
 
-// --- Matte gold caption ---
-// The caption face is the image-creator's deep matte "Victory" gold, drawn as a
-// single clean opaque pass — matching the reference banner PNGs exactly (no
-// bloom, no dark base; those made it either too bright or muddy).
-const GOLD_COLOR = 'rgb(220, 175, 45)';
+// --- Default caption palette (deep matte "Victory" gold) ---
+// The caption face is drawn as a single clean opaque pass — matching the
+// reference banner PNGs exactly (no bloom, no dark base; those made it either
+// too bright or muddy). These are the renderer's built-in defaults; per-event
+// palettes live in bannerThemes.ts and are threaded in as arguments.
+export const GOLD_FACE_COLOR = 'rgb(220, 175, 45)';
 
 // The .banner-sheen layer is the image-creator's additive ghost (blurTint
 // [255,208,66] @ blurOpacity 0.18), stacked on top of the face and blended
@@ -42,8 +43,8 @@ const GOLD_COLOR = 'rgb(220, 175, 45)';
 // face it adds to the deep gold -> the bright overlap tone (~255,213,57); where
 // it spreads past the letters it becomes the dim offset echo. Its outward
 // spread (SHEEN_SCALE_X in CSS) is animated after the fade-in.
-const SHEEN_COLOR = 'rgb(255, 208, 66)';
-const SHEEN_OPACITY = 0.18;
+export const GOLD_SHEEN_COLOR = 'rgb(255, 208, 66)';
+export const GOLD_SHEEN_OPACITY = 0.18;
 
 const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
   const fontSize = FONT_SIZE * (canvas.height / 1080);
@@ -130,15 +131,16 @@ const drawEldenText = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   caption: string,
+  faceColor: string,
 ): void => {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
   applyFont(ctx, canvas);
 
-  // Opaque deep matte gold face — a single clean pass, matching the reference.
+  // Opaque matte face — a single clean pass, matching the reference.
   ctx.save();
   applyFont(ctx, canvas);
-  ctx.fillStyle = GOLD_COLOR;
+  ctx.fillStyle = faceColor;
   ctx.fillText(caption, centerX, centerY);
   ctx.restore();
 };
@@ -147,6 +149,8 @@ const drawSheenEcho = (
   ctx: CanvasRenderingContext2D,
   canvas: HTMLCanvasElement,
   caption: string,
+  sheenColor: string,
+  sheenOpacity: number,
 ): void => {
   const centerX = canvas.width / 2;
   const centerY = canvas.height / 2;
@@ -156,8 +160,8 @@ const drawSheenEcho = (
   // faint spreading fringe shows as the see-through echo.
   ctx.save();
   applyFont(ctx, canvas);
-  ctx.globalAlpha = SHEEN_OPACITY;
-  ctx.fillStyle = SHEEN_COLOR;
+  ctx.globalAlpha = sheenOpacity;
+  ctx.fillStyle = sheenColor;
   ctx.fillText(caption, centerX, centerY);
   ctx.restore();
 };
@@ -187,11 +191,22 @@ export const generateBandDataUrl = (): string => withCanvas(drawShadowBar);
  * drawn aligned with the caption. Rendered as its own element, stacked *below*
  * the opaque caption, so the caption masks its centre and only the outward
  * horizontal spread emerges from behind the letters (see .banner-sheen in
- * styles.css).
+ * styles.css). Colors default to the gold palette; callers pass a per-theme
+ * palette to restyle the echo (see bannerThemes.ts).
  */
-export const generateSheenDataUrl = (caption: string): string =>
-  withCanvas((ctx, canvas) => drawSheenEcho(ctx, canvas, caption));
+export const generateSheenDataUrl = (
+  caption: string,
+  sheenColor: string = GOLD_SHEEN_COLOR,
+  sheenOpacity: number = GOLD_SHEEN_OPACITY,
+): string =>
+  withCanvas((ctx, canvas) => drawSheenEcho(ctx, canvas, caption, sheenColor, sheenOpacity));
 
-/** Top layer: the opaque gold caption (with its glow/shadow), transparent bg. */
-export const generateCaptionDataUrl = (caption: string): string =>
-  withCanvas((ctx, canvas) => drawEldenText(ctx, canvas, caption));
+/**
+ * Top layer: the opaque caption face on a transparent bg. The face color
+ * defaults to the gold palette; callers pass a per-theme color to restyle it
+ * (see bannerThemes.ts).
+ */
+export const generateCaptionDataUrl = (
+  caption: string,
+  faceColor: string = GOLD_FACE_COLOR,
+): string => withCanvas((ctx, canvas) => drawEldenText(ctx, canvas, caption, faceColor));
