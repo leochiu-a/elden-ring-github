@@ -1,5 +1,11 @@
 # elden-ring-github
 
+## 2.0.2
+
+### Patch Changes
+
+- 5ccfa81: Fix PR creation banner not appearing under GitHub's Turbo soft navigation. The compare form now submits without a full page reload, so `checkForPRCreationSuccess` is re-checked on DOM change (not only on init), mirroring the close feature.
+
 ## 2.0.1
 
 ### Patch Changes
