@@ -52,6 +52,10 @@ export class CreationFeature implements GitHubFeature {
   }
 
   onDomChange(): void {
+    checkForPRCreationSuccess({
+      showSettings: this.options.showSettings,
+      onCreated: this.options.onCreated,
+    });
     detectPRCreationButtons({
       showSettings: this.options.showSettings,
     });
