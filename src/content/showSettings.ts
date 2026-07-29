@@ -1,5 +1,6 @@
 import type { SoundType } from '../types/sounds';
 import type { CaptionSettings } from '../types/captions';
+import { DEFAULT_SOUND_VOLUME } from '../types/settings';
 
 export interface SettingsState extends CaptionSettings {
   soundEnabled: boolean;
@@ -28,7 +29,7 @@ const STATE_KEY_MAP: Record<ShowSettingKey, keyof ShowSettingsFlags> = {
 const defaultState: SettingsState = {
   soundEnabled: true,
   soundType: 'you-die-sound',
-  soundVolume: 1,
+  soundVolume: DEFAULT_SOUND_VOLUME,
   showOnPRMerged: true,
   showOnPRCreate: true,
   showOnPRApprove: true,
@@ -68,7 +69,8 @@ export class ShowSettings {
         this.state = {
           soundEnabled: result.soundEnabled !== false,
           soundType: result.soundType || 'you-die-sound',
-          soundVolume: typeof result.soundVolume === 'number' ? result.soundVolume : 1,
+          soundVolume:
+            typeof result.soundVolume === 'number' ? result.soundVolume : DEFAULT_SOUND_VOLUME,
           showOnPRMerged: result.showOnPRMerged !== false,
           showOnPRCreate: result.showOnPRCreate !== false,
           showOnPRApprove: result.showOnPRApprove !== false,
@@ -96,7 +98,9 @@ export class ShowSettings {
       }
       if (changes.soundVolume) {
         nextState.soundVolume =
-          typeof changes.soundVolume.newValue === 'number' ? changes.soundVolume.newValue : 1;
+          typeof changes.soundVolume.newValue === 'number'
+            ? changes.soundVolume.newValue
+            : DEFAULT_SOUND_VOLUME;
         updated = true;
       }
       if (changes.showOnPRMerged) {

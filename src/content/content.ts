@@ -7,14 +7,14 @@ import {
   type GitHubFeature,
 } from './features';
 import { ShowSettings, type SettingsState } from './showSettings';
-import type { SoundType } from '../types/settings';
+import { DEFAULT_SOUND_VOLUME, type SoundType } from '../types/settings';
 import { CAPTION_STORAGE_KEYS } from '../types/captions';
 
 class EldenRingOrchestrator {
   private bannerShown: boolean = false;
   private soundEnabled: boolean = true;
   private soundType: SoundType = 'you-die-sound';
-  private soundVolume: number = 1;
+  private soundVolume: number = DEFAULT_SOUND_VOLUME;
   private soundUrl: string;
   private captions: SettingsState = {} as SettingsState;
   private features: GitHubFeature[] = [];

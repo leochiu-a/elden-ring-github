@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'preact/hooks';
-import type { EldenRingSettings, SoundType } from '../types/settings';
+import { DEFAULT_SOUND_VOLUME, type EldenRingSettings, type SoundType } from '../types/settings';
 
 export interface PopupSettings {
   showOnPRMerged: boolean;
@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: PopupSettings = {
   showOnPRApprove: true,
   showOnPRClose: true,
   soundEnabled: true,
-  soundVolume: 1,
+  soundVolume: DEFAULT_SOUND_VOLUME,
   soundType: 'you-die-sound',
   duration: 5000,
   captionMerged: '',
@@ -67,7 +67,8 @@ export const useSettings = () => {
         showOnPRApprove: result.showOnPRApprove !== false,
         showOnPRClose: result.showOnPRClose !== false,
         soundEnabled: result.soundEnabled !== false,
-        soundVolume: typeof result.soundVolume === 'number' ? result.soundVolume : 1,
+        soundVolume:
+          typeof result.soundVolume === 'number' ? result.soundVolume : DEFAULT_SOUND_VOLUME,
         soundType: (result.soundType as SoundType) || 'you-die-sound',
         duration: typeof result.duration === 'number' ? result.duration : 5000,
         captionMerged: result.captionMerged ?? '',
