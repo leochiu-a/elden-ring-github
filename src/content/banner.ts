@@ -1,6 +1,7 @@
 import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
 import { resolveBannerTheme } from './bannerThemes';
 import { resolveCaption } from '../types/captions';
+import { DEFAULT_SOUND_VOLUME } from '../types/settings';
 
 export type BannerType = 'merged' | 'created' | 'approved' | 'closed';
 
@@ -61,7 +62,7 @@ export const renderBanner = ({
 
     if (soundEnabled) {
       const audio = new Audio(soundUrl);
-      audio.volume = Math.min(1, Math.max(0, soundVolume ?? 1));
+      audio.volume = Math.min(1, Math.max(0, soundVolume ?? DEFAULT_SOUND_VOLUME));
       audio.play().catch((err) => console.log('Sound playback failed:', err));
     }
 

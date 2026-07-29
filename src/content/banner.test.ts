@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { renderBanner, type BannerType } from './banner';
+import { DEFAULT_SOUND_VOLUME } from '../types/settings';
 
 describe('renderBanner', () => {
   const soundUrl = 'chrome-extension://mock/sound.mp3';
@@ -112,7 +113,7 @@ describe('renderBanner', () => {
     expect(onHide).toHaveBeenCalled();
   });
 
-  it('defaults audio volume to 1 when soundVolume is not provided', () => {
+  it('falls back to the default volume when soundVolume is not provided', () => {
     renderBanner({
       type: 'merged',
       soundUrl,
@@ -121,7 +122,7 @@ describe('renderBanner', () => {
     });
 
     expect(audioInstances).toHaveLength(1);
-    expect(audioInstances[0]!.volume).toBe(1);
+    expect(audioInstances[0]!.volume).toBe(DEFAULT_SOUND_VOLUME);
   });
 
   it.each([
