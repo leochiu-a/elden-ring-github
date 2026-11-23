@@ -1,5 +1,11 @@
 # elden-ring-github
 
+## 2.0.3
+
+### Patch Changes
+
+- 31bfb89: Lower the default sound volume from 100% to 30% so the banner sound isn't jarring on first install
+
 ## 2.0.2
 
 ### Patch Changes
