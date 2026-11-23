@@ -46,10 +46,6 @@ describe('renderBanner', () => {
     vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(
       fakeCtx as unknown as CanvasRenderingContext2D,
     );
-    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue(
-      'data:image/png;base64,mock',
-    );
-
     audioInstances = [];
     global.Audio = vi.fn().mockImplementation(() => {
       const instance = {
@@ -80,12 +76,13 @@ describe('renderBanner', () => {
 
       const banner = document.getElementById('elden-ring-banner');
       expect(banner).toBeTruthy();
-      const band = banner?.querySelector('img.banner-band') as HTMLImageElement | null;
-      const sheen = banner?.querySelector('img.banner-sheen') as HTMLImageElement | null;
-      const caption = banner?.querySelector('img.banner-caption') as HTMLImageElement | null;
-      expect(band?.src).toBe('data:image/png;base64,mock');
-      expect(sheen?.src).toBe('data:image/png;base64,mock');
-      expect(caption?.src).toBe('data:image/png;base64,mock');
+      const band = banner?.querySelector('canvas.banner-band');
+      const sheen = banner?.querySelector('canvas.banner-sheen');
+      const caption = banner?.querySelector('canvas.banner-caption');
+      expect(band).toBeTruthy();
+      expect(sheen).toBeTruthy();
+      expect(caption).toBeTruthy();
+      expect(banner?.getAttribute('aria-label')).toBeTruthy();
       // Sheen must come after the caption so its additive ghost blends on top
       // of the gold face (bright overlap tone) and spreads into the echo.
       expect(
@@ -97,6 +94,16 @@ describe('renderBanner', () => {
 
       document.body.innerHTML = '';
     });
+  });
+
+  it('renders nothing and reports failure when a 2d context is unavailable', () => {
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockReturnValue(null);
+
+    const ok = renderBanner({ type: 'merged', soundUrl, soundEnabled: true, onHide: vi.fn() });
+
+    expect(ok).toBe(false);
+    expect(document.getElementById('elden-ring-banner')).toBeNull();
+    expect(global.Audio).not.toHaveBeenCalled();
   });
 
   it('should skip audio when sound is disabled', () => {

@@ -58,9 +58,16 @@ class EldenRingOrchestrator {
   }
 
   private observeDOMChanges(): void {
-    // Observe for GitHub's dynamic content loading
+    // Observe for GitHub's dynamic content loading. Bursts of mutations are
+    // coalesced into one detection pass per animation frame, so a busy page
+    // doesn't run every selector and storage lookup once per mutation batch.
+    let pendingFrame: number | null = null;
     const observer = new MutationObserver(() => {
-      this.features.forEach((feature) => feature.onDomChange());
+      if (pendingFrame !== null) return;
+      pendingFrame = requestAnimationFrame(() => {
+        pendingFrame = null;
+        this.features.forEach((feature) => feature.onDomChange());
+      });
     });
 
     observer.observe(document.body, {

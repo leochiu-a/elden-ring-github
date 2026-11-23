@@ -1,4 +1,4 @@
-import { generateBandDataUrl, generateSheenDataUrl, generateCaptionDataUrl } from './eldenBanner';
+import { createBannerCanvas, drawBand, drawCaption, drawSheen } from './eldenBanner';
 import { resolveBannerTheme } from './bannerThemes';
 import { resolveCaption } from '../types/captions';
 import { DEFAULT_SOUND_VOLUME } from '../types/settings';
@@ -33,30 +33,31 @@ export const renderBanner = ({
     const resolvedCaption = resolveCaption(type, caption);
     const theme = resolveBannerTheme(type);
 
+    // Layers are drawn straight onto viewport-sized canvases and shown as-is —
+    // no PNG encode/decode round trip on the main thread.
+    const layer = (className: string, draw: (canvas: HTMLCanvasElement) => boolean) => {
+      const canvas = createBannerCanvas();
+      canvas.className = className;
+      canvas.setAttribute('aria-hidden', 'true');
+      if (!draw(canvas)) {
+        throw new Error(`2d context unavailable for ${className}`);
+      }
+      banner.appendChild(canvas);
+    };
+
     // Bottom layer: the smoky band. Defines the banner's size.
-    const band = document.createElement('img');
-    band.className = 'banner-band';
-    band.src = generateBandDataUrl();
-    band.alt = '';
-    band.setAttribute('aria-hidden', 'true');
-    banner.appendChild(band);
-
+    layer('banner-band', drawBand);
     // Middle layer: the opaque matte caption face, in the theme's face color.
-    const caption_ = document.createElement('img');
-    caption_.className = 'banner-caption';
-    caption_.src = generateCaptionDataUrl(resolvedCaption, theme.faceColor);
-    caption_.alt = resolvedCaption;
-    banner.appendChild(caption_);
-
+    layer('banner-caption', (canvas) => drawCaption(canvas, resolvedCaption, theme.faceColor));
     // Top layer: the additive sheen, blended over the face. Where it aligns it
     // brightens the face (the layered overlap tone); as it spreads outward after
     // the fade-in it becomes the dim offset echo.
-    const sheen = document.createElement('img');
-    sheen.className = 'banner-sheen';
-    sheen.src = generateSheenDataUrl(resolvedCaption, theme.sheenColor, theme.sheenOpacity);
-    sheen.alt = '';
-    sheen.setAttribute('aria-hidden', 'true');
-    banner.appendChild(sheen);
+    layer('banner-sheen', (canvas) =>
+      drawSheen(canvas, resolvedCaption, theme.sheenColor, theme.sheenOpacity),
+    );
+
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('aria-label', resolvedCaption);
 
     document.body.appendChild(banner);
 

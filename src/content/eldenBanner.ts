@@ -7,11 +7,19 @@
  * dark band — so it reads like an ancient sigil rising over the page beneath.
  */
 
-// Rendered at 2x (3840x2160) so the banner stays sharp when CSS upscales it to
-// full viewport width on 2K/high-DPI displays. All draw sizes derive from
-// canvas.height / 1080, so the higher resolution keeps proportions identical.
-const CANVAS_WIDTH = 3840;
-const CANVAS_HEIGHT = 2160;
+// The banner is laid out on a virtual 1920x1080 stage that spans the viewport
+// width; all draw sizes are authored in those units and multiplied by
+// `stageScale(canvas)`. The canvas itself is sized to the viewport in device
+// pixels (capped at 2x) and cropped to the band's height, so it is never larger
+// than what is actually shown — the old fixed 3840x2160 canvas cost ~4x the
+// pixels on 1x screens and was mostly transparent.
+const STAGE_WIDTH = 1920;
+const STAGE_HEIGHT = 1080;
+const MAX_PIXEL_RATIO = 2;
+// Canvas height as a fraction of the stage height: the band plus headroom for
+// its baked drop shadow.
+const CANVAS_HEIGHT_RATIO = 0.4;
+const BAND_DROP_SHADOW = 10; // CSS px around the band, like the in-game shadow
 
 const FONT_FAMILY = "'Agmena Pro', Georgia, 'Times New Roman', serif";
 const FONT_SIZE = 80;
@@ -46,8 +54,10 @@ export const GOLD_FACE_COLOR = 'rgb(220, 175, 45)';
 export const GOLD_SHEEN_COLOR = 'rgb(255, 208, 66)';
 export const GOLD_SHEEN_OPACITY = 0.18;
 
+const stageScale = (canvas: HTMLCanvasElement): number => canvas.width / STAGE_WIDTH;
+
 const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): number => {
-  const fontSize = FONT_SIZE * (canvas.height / 1080);
+  const fontSize = FONT_SIZE * stageScale(canvas);
   ctx.font = `${FONT_WEIGHT} ${fontSize}px ${FONT_FAMILY}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
@@ -56,8 +66,8 @@ const applyFont = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): nu
 };
 
 const drawShadowBar = (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement): void => {
-  const scale = canvas.height / 1080;
-  const barHeight = canvas.height * BAR_HEIGHT_RATIO;
+  const scale = stageScale(canvas);
+  const barHeight = STAGE_HEIGHT * scale * BAR_HEIGHT_RATIO;
   const centerY = canvas.height / 2;
   const top = centerY - barHeight / 2;
 
@@ -166,47 +176,76 @@ const drawSheenEcho = (
   ctx.restore();
 };
 
-const withCanvas = (
-  draw: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void,
-): string => {
+/**
+ * Creates a canvas sized for the current viewport: full viewport width in
+ * device pixels (capped at MAX_PIXEL_RATIO), cropped to the band's height.
+ * Displayed at `width: 100vw; height: auto`, so it maps 1:1 to screen pixels.
+ */
+export const createBannerCanvas = (
+  viewportWidth: number = window.innerWidth,
+  pixelRatio: number = window.devicePixelRatio || 1,
+): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
-  canvas.width = CANVAS_WIDTH;
-  canvas.height = CANVAS_HEIGHT;
-
-  const ctx = canvas.getContext('2d');
-  if (!ctx) {
-    return '';
-  }
-
-  draw(ctx, canvas);
-
-  return canvas.toDataURL('image/png');
+  canvas.width = Math.max(1, Math.round(viewportWidth * Math.min(pixelRatio, MAX_PIXEL_RATIO)));
+  canvas.height = Math.max(1, Math.round(STAGE_HEIGHT * stageScale(canvas) * CANVAS_HEIGHT_RATIO));
+  return canvas;
 };
 
-/** Bottom layer: the smoky dark band only, on a transparent canvas. */
-export const generateBandDataUrl = (): string => withCanvas(drawShadowBar);
+const drawOn = (
+  canvas: HTMLCanvasElement,
+  draw: (ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) => void,
+): boolean => {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    return false;
+  }
+  draw(ctx, canvas);
+  return true;
+};
 
 /**
- * Middle layer: only the faint echo of the caption on a transparent canvas,
- * drawn aligned with the caption. Rendered as its own element, stacked *below*
- * the opaque caption, so the caption masks its centre and only the outward
- * horizontal spread emerges from behind the letters (see .banner-sheen in
+ * Bottom layer: the smoky dark band with its drop shadow baked in. The band is
+ * drawn on a scratch canvas and composited through a drop-shadow filter once,
+ * instead of a CSS `filter` that the compositor would re-run every frame of
+ * the fade.
+ */
+export const drawBand = (canvas: HTMLCanvasElement): boolean =>
+  drawOn(canvas, (ctx) => {
+    const layer = document.createElement('canvas');
+    layer.width = canvas.width;
+    layer.height = canvas.height;
+    if (!drawOn(layer, drawShadowBar)) {
+      return;
+    }
+    // CSS px -> canvas px, since the canvas is displayed at the viewport width.
+    const shadow = BAND_DROP_SHADOW * (canvas.width / (window.innerWidth || canvas.width));
+    ctx.save();
+    ctx.filter = `drop-shadow(0 0 ${shadow}px black)`;
+    ctx.drawImage(layer, 0, 0);
+    ctx.restore();
+  });
+
+/**
+ * Sheen layer: only the faint echo of the caption on a transparent canvas,
+ * drawn aligned with the caption and stacked above it (see .banner-sheen in
  * styles.css). Colors default to the gold palette; callers pass a per-theme
  * palette to restyle the echo (see bannerThemes.ts).
  */
-export const generateSheenDataUrl = (
+export const drawSheen = (
+  canvas: HTMLCanvasElement,
   caption: string,
   sheenColor: string = GOLD_SHEEN_COLOR,
   sheenOpacity: number = GOLD_SHEEN_OPACITY,
-): string =>
-  withCanvas((ctx, canvas) => drawSheenEcho(ctx, canvas, caption, sheenColor, sheenOpacity));
+): boolean =>
+  drawOn(canvas, (ctx) => drawSheenEcho(ctx, canvas, caption, sheenColor, sheenOpacity));
 
 /**
- * Top layer: the opaque caption face on a transparent bg. The face color
+ * Caption layer: the opaque caption face on a transparent bg. The face color
  * defaults to the gold palette; callers pass a per-theme color to restyle it
  * (see bannerThemes.ts).
  */
-export const generateCaptionDataUrl = (
+export const drawCaption = (
+  canvas: HTMLCanvasElement,
   caption: string,
   faceColor: string = GOLD_FACE_COLOR,
-): string => withCanvas((ctx, canvas) => drawEldenText(ctx, canvas, caption, faceColor));
+): boolean => drawOn(canvas, (ctx) => drawEldenText(ctx, canvas, caption, faceColor));
